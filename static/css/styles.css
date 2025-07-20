@@ -1,0 +1,1326 @@
+/* =============================================================================
+   ASTRO GENERATOR - STYLES CSS
+   Interface astrologique pour génération d'horoscopes et vidéos
+   ============================================================================= */
+
+/* =============================================================================
+   1. RESET ET BASE
+   ============================================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+    background: 
+        radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%),
+        linear-gradient(135deg, #0c0c0c 0%, #1a0033 50%, #2d1b69 100%);
+    background-attachment: fixed;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* =============================================================================
+   2. ANIMATIONS ET EFFETS VISUELS
+   ============================================================================= */
+
+/* Animation des étoiles en arrière-plan */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,215,0,0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, rgba(138,43,226,0.6), transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,20,147,0.4), transparent),
+        radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.8), transparent);
+    background-repeat: repeat;
+    background-size: 300px 200px;
+    animation: stars 30s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Animations globales */
+@keyframes stars {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-200px); }
+}
+
+@keyframes stellarGlow {
+    0% { filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.8)); }
+    100% { filter: drop-shadow(0 0 20px rgba(255, 20, 147, 1)); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes messageSlide {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes neonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes loadingPulse {
+    0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-confirm {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5); }
+    100% { transform: scale(1); }
+}
+
+/* =============================================================================
+   3. LAYOUT PRINCIPAL
+   ============================================================================= */
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    position: relative;
+    z-index: 2;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.content-header {
+    padding: 20px;
+    background: rgba(10, 10, 30, 0.9);
+    border-bottom: 2px solid #8A2BE2;
+    box-shadow: 0 2px 20px rgba(138, 43, 226, 0.3);
+}
+
+.content-area {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* =============================================================================
+   4. SIDEBAR NAVIGATION
+   ============================================================================= */
+
+.sidebar {
+    width: 300px;
+    background: rgba(15, 15, 40, 0.95);
+    border-right: 2px solid #8A2BE2;
+    box-shadow: 0 0 30px rgba(138, 43, 226, 0.3);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease;
+}
+
+/* Header de la sidebar */
+.sidebar-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 50%, #FF1493 100%);
+    border-bottom: 1px solid #8A2BE2;
+    text-align: center;
+}
+
+.logo-astral {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.constellation-icon {
+    width: 40px;
+    height: 40px;
+    animation: stellarGlow 3s ease-in-out infinite alternate;
+}
+
+.app-title {
+    color: #fff;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+}
+
+.app-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.6em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Sélecteur de modèle Ollama */
+.model-selector {
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+    border-top: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.model-label {
+    display: block;
+    color: #E6E6FA;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.6);
+}
+
+.model-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #8A2BE2;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #E6E6FA;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.model-select:hover,
+.model-select:focus {
+    border-color: #FF1493;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+    outline: none;
+}
+
+/* Statut du modèle */
+.model-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #E6E6FA;
+    opacity: 0.8;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #8A2BE2;
+    transition: all 0.3s;
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.5);
+}
+
+.status-dot.loading {
+    background: #FFD700 !important;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.8) !important;
+    animation: neonPulse 1s infinite;
+}
+
+.status-dot.connected {
+    background: #00ff41 !important;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.8) !important;
+}
+
+.status-dot.error {
+    background: #ff4444 !important;
+    box-shadow: 0 0 8px rgba(255, 68, 68, 0.8) !important;
+}
+
+.status-dot.confirming {
+    animation: pulse-confirm 0.5s ease-in-out;
+}
+
+.status-text {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Menu de navigation */
+.nav-menu {
+    padding: 0;
+    list-style: none;
+}
+
+.nav-item {
+    border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: #E6E6FA;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.nav-link:hover {
+    background: rgba(138, 43, 226, 0.2);
+    color: #fff;
+    box-shadow: inset 0 0 20px rgba(138, 43, 226, 0.3);
+}
+
+.nav-link.active {
+    background: rgba(138, 43, 226, 0.4);
+    color: #fff;
+    border-left: 4px solid #FF1493;
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* Bouton menu mobile */
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: rgba(138, 43, 226, 0.9);
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* =============================================================================
+   5. SECTIONS DE CONTENU
+   ============================================================================= */
+
+.page-title {
+    color: #E6E6FA;
+    font-size: 1.8em;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+    margin-bottom: 5px;
+}
+
+.page-subtitle {
+    color: rgba(230, 230, 250, 0.7);
+    font-size: 0.9em;
+}
+
+.content-section {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.content-section.active {
+    display: block;
+}
+
+/* =============================================================================
+   6. FORMULAIRES ET CONTRÔLES
+   ============================================================================= */
+
+/* Conteneurs de formulaire */
+.form-container {
+    background: rgba(15, 15, 40, 0.8);
+    border: 2px solid #8A2BE2;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+}
+
+/* Groupes de formulaire standard */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group.compact {
+    margin-bottom: 15px;
+}
+
+/* Labels */
+.form-label {
+    display: block;
+    color: #E6E6FA;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.6);
+}
+
+.form-label.compact {
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+/* Champs de saisie et sélecteurs */
+.form-select, 
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #8A2BE2;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #E6E6FA;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-select.compact,
+.form-input.compact {
+    padding: 10px 12px;
+    font-size: 13px;
+    border: 1px solid #8A2BE2;
+    border-radius: 6px;
+}
+
+.form-select:focus, 
+.form-input:focus,
+.form-select.compact:focus,
+.form-input.compact:focus {
+    outline: none;
+    border-color: #FF1493;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
+}
+
+.form-input.compact:focus {
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.3);
+}
+
+.form-input.compact[type="date"] {
+    color: #E6E6FA;
+}
+
+/* Textarea spécialisé pour prompt */
+.form-input.compact[id="custom-prompt"] {
+    resize: vertical;
+    min-height: 80px;
+    font-family: 'Courier New', monospace;
+    line-height: 1.4;
+}
+
+.form-input.compact[id="custom-prompt"]:focus {
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.4);
+}
+
+/* Hints et textes d'aide */
+.form-hint {
+    display: block;
+    color: rgba(230, 230, 250, 0.6);
+    font-size: 11px;
+    margin-top: 5px;
+    line-height: 1.3;
+    font-style: italic;
+}
+
+/* Validation visuelle */
+.form-select.compact[required]:invalid {
+    border-color: rgba(255, 68, 68, 0.5);
+}
+
+.form-select.compact[required]:valid {
+    border-color: rgba(0, 255, 65, 0.5);
+}
+
+/* =============================================================================
+   7. BOUTONS ET ACTIONS
+   ============================================================================= */
+
+/* Bouton principal astrologique */
+.astro-button {
+    background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 50%, #FF1493 100%);
+    color: #fff;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+}
+
+.astro-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 25px rgba(138, 43, 226, 0.6);
+}
+
+.astro-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Boutons ComfyUI spécialisés */
+.astro-button.comfyui-button {
+    padding: 12px 20px;
+    font-size: 12px;
+    border-radius: 20px;
+    min-width: 160px;
+    text-align: center;
+}
+
+/* Boutons vidéo (pour les résultats) */
+.video-button {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 12px;
+}
+
+.video-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+.video-button.secondary {
+    background: linear-gradient(135deg, #8A2BE2, #FF1493);
+    color: #fff;
+}
+
+/* Bouton d'envoi dans le chat */
+.send-button {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #8A2BE2, #FF1493);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.send-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+}
+
+/* Conteneurs de boutons */
+.video-buttons-container {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.video-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 20, 147, 0.2);
+}
+
+.video-preview .video-actions {
+    margin-top: 30px;
+    padding-top: 25px;
+}
+
+/* =============================================================================
+   8. RÉSULTATS ET CARTES
+   ============================================================================= */
+
+/* Résultats d'horoscope */
+.horoscope-result {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #FF1493;
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 20px;
+    box-shadow: 0 0 25px rgba(255, 20, 147, 0.4);
+}
+
+.horoscope-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 20, 147, 0.3);
+}
+
+.sign-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #8A2BE2, #FF1493);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.horoscope-meta {
+    color: #E6E6FA;
+}
+
+.horoscope-text {
+    color: #fff;
+    line-height: 1.6;
+    font-size: 1.1em;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* Grille des horoscopes quotidiens */
+.horoscopes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.horoscope-card {
+    background: rgba(15, 15, 40, 0.8);
+    border: 2px solid #8A2BE2;
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.horoscope-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(138, 43, 226, 0.5);
+    border-color: #FF1493;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.card-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #8A2BE2, #FF1493);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+}
+
+.card-title {
+    color: #E6E6FA;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.card-dates {
+    color: rgba(230, 230, 250, 0.7);
+    font-size: 0.8em;
+}
+
+.card-content {
+    color: #fff;
+    line-height: 1.5;
+    font-size: 0.9em;
+}
+
+/* =============================================================================
+   9. SECTION VIDÉO SPÉCIALISÉE
+   ============================================================================= */
+
+/* Layout spécial 2 colonnes pour la vidéo */
+.video-form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 30px;
+    margin-bottom: 25px;
+}
+
+.video-form-left {
+    background: rgba(10, 10, 30, 0.5);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.video-form-right {
+    background: rgba(10, 10, 30, 0.5);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    animation: slideInUp 0.5s ease-out;
+}
+
+/* Titres des zones vidéo */
+.video-form-left::before {
+    content: "⚙️ Paramètres Essentiels";
+    display: block;
+    color: #FFD700;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.video-form-right::before {
+    content: "🎨 Paramètres Avancés";
+    display: block;
+    color: #FFD700;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+/* Prévisualisation vidéo */
+.video-preview {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #FF1493;
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.video-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.spec-item {
+    background: rgba(138, 43, 226, 0.2);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #8A2BE2;
+}
+
+.spec-label {
+    color: #E6E6FA;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.spec-value {
+    color: #fff;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.video-text-content {
+    background: rgba(15, 15, 40, 0.9);
+    border: 1px solid #8A2BE2;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.text-overlay {
+    color: #fff;
+    line-height: 1.4;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* Prévisualisation constellation */
+.constellation-preview {
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a0033 50%, #2d1b69 100%);
+    border: 2px solid #FFD700;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.constellation-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+        radial-gradient(2px 2px at 40% 70%, rgba(255,215,0,0.8), transparent),
+        radial-gradient(1px 1px at 90% 40%, rgba(138,43,226,0.6), transparent);
+    background-size: 200px 200px;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.constellation-sign {
+    font-size: 4em;
+    color: #FFD700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 2;
+}
+
+/* =============================================================================
+   10. INTERFACE CHAT
+   ============================================================================= */
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.message {
+    margin-bottom: 20px;
+    animation: messageSlide 0.5s ease-out;
+}
+
+.message.user {
+    text-align: right;
+}
+
+.message.assistant {
+    text-align: left;
+}
+
+.message-content {
+    display: inline-block;
+    max-width: 70%;
+    padding: 15px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.message.user .message-content {
+    background: linear-gradient(135deg, #8A2BE2, #FF1493);
+    color: #fff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.message.assistant .message-content {
+    background: rgba(15, 15, 40, 0.8);
+    color: #E6E6FA;
+    border: 1px solid #8A2BE2;
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    background: rgba(15, 15, 40, 0.8);
+    border-radius: 10px;
+    border: 2px solid #8A2BE2;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #E6E6FA;
+    font-family: 'Courier New', monospace;
+}
+
+.chat-input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+/* =============================================================================
+   11. ANIMATIONS DE CHARGEMENT
+   ============================================================================= */
+
+.loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: #E6E6FA;
+}
+
+.loading.active {
+    display: block;
+}
+
+.loading-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.loading-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #8A2BE2;
+    animation: loadingPulse 1.4s infinite ease-in-out;
+}
+
+.loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.loading-dot:nth-child(2) { animation-delay: -0.16s; }
+.loading-dot:nth-child(3) { animation-delay: 0s; }
+
+/* =============================================================================
+   12. RESPONSIVE DESIGN
+   ============================================================================= */
+
+@media (max-width: 768px) {
+    /* Sidebar mobile */
+    .sidebar {
+        width: 250px;
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 1000;
+        height: 100vh;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    /* Layout vidéo responsive */
+    .video-form-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .video-form-left,
+    .video-form-right {
+        padding: 15px;
+    }
+    
+    /* Boutons responsive */
+    .video-buttons-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .video-buttons-container button {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .video-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Grilles responsive */
+    .horoscopes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .video-specs {
+        grid-template-columns: 1fr;
+    }
+
+    /* Messages chat responsive */
+    .message-content {
+        max-width: 85%;
+    }
+
+    /* Constellation responsive */
+    .constellation-sign {
+        font-size: 3em;
+    }
+
+    /* Réduction des paddings sur mobile */
+    .content-area {
+        padding: 15px;
+    }
+
+    .form-container {
+        padding: 20px;
+    }
+
+    .horoscope-result {
+        padding: 20px;
+    }
+
+    .video-preview {
+        padding: 15px;
+    }
+
+    .constellation-preview {
+        padding: 20px;
+    }
+}
+
+/* =============================================================================
+   13. UTILITAIRES ET ÉTATS SPÉCIAUX
+   ============================================================================= */
+
+/* Classes utilitaires pour les états */
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-up {
+    animation: slideInUp 0.5s ease-out;
+}
+
+/* États de validation */
+.success {
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3) !important;
+}
+
+.error {
+    border-color: #ff4444 !important;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.3) !important;
+}
+
+.warning {
+    border-color: #FFD700 !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* États des boutons */
+.button-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.button-success {
+    background: linear-gradient(135deg, #00ff41, #00cc33) !important;
+    transform: scale(1.05);
+}
+
+.button-error {
+    background: linear-gradient(135deg, #ff4444, #cc0000) !important;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Indicateurs de statut */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-indicator.online {
+    background: #00ff41;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+}
+
+.status-indicator.offline {
+    background: #ff4444;
+    box-shadow: 0 0 8px rgba(255, 68, 68, 0.6);
+}
+
+.status-indicator.loading {
+    background: #FFD700;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    animation: neonPulse 1s infinite;
+}
+
+/* Tooltips simples */
+.tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+}
+
+/* =============================================================================
+   14. THÈMES ET VARIANTES
+   ============================================================================= */
+
+/* Variante sombre (par défaut) */
+:root {
+    --primary-purple: #8A2BE2;
+    --primary-pink: #FF1493;
+    --secondary-gold: #FFD700;
+    --background-dark: rgba(15, 15, 40, 0.8);
+    --background-darker: rgba(0, 0, 0, 0.7);
+    --text-primary: #E6E6FA;
+    --text-secondary: rgba(230, 230, 250, 0.7);
+    --border-primary: #8A2BE2;
+    --border-secondary: rgba(138, 43, 226, 0.3);
+    --shadow-purple: rgba(138, 43, 226, 0.3);
+    --shadow-pink: rgba(255, 20, 147, 0.4);
+}
+
+/* Variante claire (optionnelle pour futur usage) */
+.theme-light {
+    --primary-purple: #6A4C93;
+    --primary-pink: #C1666B;
+    --secondary-gold: #E4B429;
+    --background-dark: rgba(255, 255, 255, 0.9);
+    --background-darker: rgba(240, 240, 240, 0.9);
+    --text-primary: #2D3436;
+    --text-secondary: #636E72;
+    --border-primary: #6A4C93;
+    --border-secondary: rgba(106, 76, 147, 0.3);
+    --shadow-purple: rgba(106, 76, 147, 0.2);
+    --shadow-pink: rgba(193, 102, 107, 0.3);
+}
+
+/* =============================================================================
+   15. AMÉLIORATIONS ACCESSIBILITÉ
+   ============================================================================= */
+
+/* Focus visible pour navigation clavier */
+*:focus {
+    outline: 2px solid var(--secondary-gold);
+    outline-offset: 2px;
+}
+
+/* Amélioration des contrastes */
+.high-contrast {
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --border-primary: #ffffff;
+}
+
+/* Réduction des animations pour users sensibles */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .stars-animation,
+    body::before {
+        animation: none !important;
+    }
+}
+
+/* Amélioration pour lecteurs d'écran */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* =============================================================================
+   16. OPTIMISATIONS PERFORMANCE
+   ============================================================================= */
+
+/* Optimisation GPU pour les animations */
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.constellation-icon,
+.loading-dot,
+.status-dot {
+    will-change: transform, filter;
+}
+
+/* Optimisation des fonts */
+.font-optimized {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimisation des images/backgrounds */
+.background-optimized {
+    background-attachment: scroll; /* Fallback pour mobile */
+}
+
+@supports (background-attachment: fixed) {
+    .background-optimized {
+        background-attachment: fixed;
+    }
+}
+
+/* =============================================================================
+   17. STYLES DE DEBUG (À SUPPRIMER EN PRODUCTION)
+   ============================================================================= */
+
+/* Grille de debug */
+.debug-grid {
+    background-image: 
+        linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Outline de debug */
+.debug-outline * {
+    outline: 1px solid rgba(255, 0, 0, 0.3) !important;
+}
+
+/* Information de debug */
+.debug-info {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    color: #00ff41;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 9999;
+    display: none;
+}
+
+.debug-mode .debug-info {
+    display: block;
+}
+
+/* =============================================================================
+   18. COMMENTAIRES ET DOCUMENTATION
+   ============================================================================= */
+
+/*
+STRUCTURE GÉNÉRALE DU CSS:
+
+1. RESET ET BASE - Styles de base et reset CSS
+2. ANIMATIONS ET EFFETS VISUELS - Toutes les @keyframes et animations
+3. LAYOUT PRINCIPAL - Structure générale de l'app
+4. SIDEBAR NAVIGATION - Menu latéral et navigation
+5. SECTIONS DE CONTENU - Pages et sections principales
+6. FORMULAIRES ET CONTRÔLES - Inputs, selects, labels
+7. BOUTONS ET ACTIONS - Tous les types de boutons
+8. RÉSULTATS ET CARTES - Affichage des données
+9. SECTION VIDÉO SPÉCIALISÉE - Layout spécial vidéo
+10. INTERFACE CHAT - Chat et messages
+11. ANIMATIONS DE CHARGEMENT - Loading states
+12. RESPONSIVE DESIGN - Media queries mobile
+13. UTILITAIRES ET ÉTATS SPÉCIAUX - Classes helper
+14. THÈMES ET VARIANTES - Variables CSS et thèmes
+15. AMÉLIORATIONS ACCESSIBILITÉ - A11y et navigation
+16. OPTIMISATIONS PERFORMANCE - Performance et GPU
+17. STYLES DE DEBUG - Pour développement uniquement
+18. COMMENTAIRES ET DOCUMENTATION - Cette section
+
+CONVENTIONS UTILISÉES:
+- BEM-like naming pour certaines classes
+- Mobile-first responsive design
+- CSS custom properties pour la maintenance
+- Animations optimisées GPU avec will-change
+- Focus states pour l'accessibilité
+- Commentaires détaillés pour chaque section
+
+COULEURS PRINCIPALES:
+- Purple: #8A2BE2 (Bleu-violet, couleur principale)
+- Pink: #FF1493 (Rose fuchsia, couleur secondaire)
+- Gold: #FFD700 (Or, couleur d'accent)
+- Lavender: #E6E6FA (Lavande, texte principal)
+
+PERFORMANCES:
+- Utilisez .gpu-accelerated pour les éléments animés
+- Les animations complexes utilisent transform et opacity
+- will-change est défini sur les éléments animés
+- Media queries pour prefers-reduced-motion
+
+MAINTENANCE:
+- Chaque section est clairement délimitée
+- Les doublons ont été éliminés
+- Structure logique et hiérarchique
+- Variables CSS pour faciliter les modifications
+*/
+
+/* =============================================================================
+   FIN DU FICHIER CSS - ASTRO GENERATOR
+   ============================================================================= */
