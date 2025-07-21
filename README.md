@@ -1,4 +1,4 @@
-**AstroGenAI 🌌**
+## AstroGenAI 🌌
 AstroGenAI est une application web complète et modulaire conçue pour la génération de contenu astrologique par intelligence artificielle. Elle combine des modèles de langage locaux (via Ollama), la génération d'images et de vidéos (via ComfyUI), et des calculs astronomiques précis pour créer des horoscopes, des cartes du ciel, et des vidéos prêtes à être publiées sur les réseaux sociaux.
 
 
