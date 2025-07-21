@@ -1,0 +1,40 @@
+# === DÉPENDANCES PRINCIPALES ===
+flask>=2.3.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# === IA ET MODÈLES DE LANGAGE ===
+ollama>=0.1.0
+
+# === AUDIO ET TRANSCRIPTION ===
+openai-whisper>=20231117
+gtts>=2.4.0
+mutagen>=1.47.0
+
+# === CALCULS ASTRONOMIQUES ===
+skyfield>=1.46
+matplotlib>=3.7.0
+numpy>=1.24.0
+
+# === GÉNÉRATION VIDÉO ET TRAITEMENT ===
+# ffmpeg doit être installé séparément sur le système
+
+# === API GOOGLE/YOUTUBE ===
+google-api-python-client>=2.100.0
+google-auth-oauthlib>=1.0.0
+google-auth>=2.20.0
+
+# === MCP (Model Control Protocol) ===
+fastmcp>=0.1.0
+
+# === WEBSOCKETS (pour ComfyUI) ===
+websocket-client>=1.6.0
+
+# === TRAITEMENT DE DONNÉES ===
+tqdm>=4.65.0
+
+# === OPTIONNEL - POUR DÉVELOPPEMENT ===
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0

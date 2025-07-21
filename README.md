@@ -1,166 +1,455 @@
-## AstroGenAI 🌌
-AstroGenAI est une application web complète et modulaire conçue pour la génération de contenu astrologique par intelligence artificielle. Elle combine des modèles de langage locaux (via Ollama), la génération d'images et de vidéos (via ComfyUI), et des calculs astronomiques précis pour créer des horoscopes, des cartes du ciel, et des vidéos prêtes à être publiées sur les réseaux sociaux.
+# AstroGenAI 🌌✨
 
+> **Générateur de contenu astrologique intelligent** - Pipeline complet de création automatisée d'horoscopes, cartes du ciel et vidéos pour réseaux sociaux, propulsé par l'IA.
 
-## Fonctionnalités Clés ✨
-🔮 Horoscopes par IA : Génération d'horoscopes quotidiens ou individuels basés sur des données astrales réelles et des modèles de langage (Llama, Mistral).
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)](https://flask.palletsprojects.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Ollama](https://img.shields.io/badge/AI-Ollama-purple.svg)](https://ollama.com)
 
-🤖 Chat Astral : Une interface de chat pour converser avec un astrologue IA et poser des questions sur n'importe quel sujet astrologique.
+---
 
-** celestial_map:️ Carte du Ciel** : Génération et affichage de la carte du ciel pour n'importe quelle date, montrant les positions planétaires exactes.
+## 🚀 Vue d'Ensemble
 
-🎬 Génération de Vidéos de Constellations : Création automatique de clips vidéo animés représentant les constellations du zodiaque via ComfyUI.
+AstroGenAI est une plateforme complète qui automatise la création de contenu astrologique de qualité professionnelle. De la génération d'horoscopes personnalisés à la production de vidéos prêtes pour YouTube, TikTok et Instagram, tout est orchestré par une intelligence artificielle avancée.
 
-🎞️ Montage Vidéo Automatisé :
+### ✨ Fonctionnalités Clés
 
-Synthèse vocale (Text-to-Speech) des horoscopes en français.
+🔮 **Horoscopes Intelligents** - Génération d'horoscopes basés sur des calculs astronomiques réels (Skyfield) et des modèles de langage (Llama, Mistral)
 
-Transcription et incrustation de sous-titres synchronisés.
+🗺️ **Cartes du Ciel** - Calcul et visualisation des positions planétaires exactes pour n'importe quelle date
 
-Mixage avec une musique de fond.
+🎬 **Production Vidéo Automatisée** - Pipeline complet : Texte → Audio → Vidéo → Montage → Upload
 
-Assemblage de vidéos complètes prêtes à l'emploi.
+🤖 **Chat Astral IA** - Assistant conversationnel expert en astrologie
 
-🚀 Workflows Complets : Scripts et endpoints API pour orchestrer l'ensemble du processus, de la génération de texte à l'upload final sur YouTube.
+📱 **Multi-Plateformes** - Formats optimisés pour YouTube Shorts, TikTok, Instagram Reels
 
-📤 Upload sur YouTube : Service intégré pour téléverser les vidéos générées directement sur une chaîne YouTube via l'API.
+🎵 **Montage Professionnel** - Synchronisation audio/sous-titres, mixage musical, effets visuels
 
-## Architecture du Projet 🛠️
-L'application repose sur une architecture de services modulaire ("MCP" - Master Control Program) où chaque grande fonctionnalité est gérée par un service dédié situé dans le package astro_core. Un serveur web Flask (main.py) sert d'interface et d'orchestrateur, exposant une API REST complète pour communiquer avec les services et le frontend.
+---
 
-main.py: Serveur web Flask, gestion des routes API.
+## 🏗️ Architecture Système
 
-config.py: Configuration centralisée du projet.
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        WEB[🌐 Interface Web<br/>HTML/CSS/JS]
+        API[📡 API REST<br/>Endpoints]
+    end
+    
+    subgraph "Flask Application"
+        MAIN[🎯 main.py<br/>Orchestrateur Principal]
+        CONFIG[⚙️ config.py<br/>Configuration]
+    end
+    
+    subgraph "MCP Services Layer"
+        ASTRO[🔮 astro_mcp.py<br/>Génération Horoscopes]
+        VIDEO[🎬 video_mcp.py<br/>Montage Vidéo]
+        COMFY[🎨 comfyui_mcp.py<br/>Génération Vidéos IA]
+        YOUTUBE[📤 youtube_mcp.py<br/>Upload & API]
+        ORCHESTRATOR[🧠 orchestrator_mcp.py<br/>IA Orchestrateur]
+    end
+    
+    subgraph "External AI Services"
+        OLLAMA[🤖 Ollama<br/>LLM Local]
+        COMFYUI[🎨 ComfyUI<br/>Génération Vidéo]
+    end
+    
+    subgraph "Processing Tools"
+        WHISPER[🎤 Whisper<br/>Transcription]
+        GTTS[🔊 gTTS<br/>Synthèse Vocale]
+        FFMPEG[🎞️ FFmpeg<br/>Montage Vidéo]
+        SKYFIELD[🌟 Skyfield<br/>Calculs Astro]
+    end
+    
+    subgraph "Output"
+        SOCIAL[📱 Réseaux Sociaux<br/>YouTube/TikTok/IG]
+        FILES[📁 Fichiers Locaux<br/>MP4/MP3/PNG]
+    end
+    
+    %% Connexions principales
+    WEB --> API
+    API --> MAIN
+    MAIN --> ASTRO
+    MAIN --> VIDEO
+    MAIN --> COMFY
+    MAIN --> YOUTUBE
+    MAIN --> ORCHESTRATOR
+    
+    %% Services externes
+    ASTRO --> OLLAMA
+    ASTRO --> SKYFIELD
+    ASTRO --> GTTS
+    VIDEO --> WHISPER
+    VIDEO --> FFMPEG
+    COMFY --> COMFYUI
+    YOUTUBE --> SOCIAL
+    
+    %% Flux de données
+    VIDEO --> FILES
+    COMFY --> FILES
+    
+    %% Style
+    classDef primary fill:#8A2BE2,stroke:#fff,stroke-width:2px,color:#fff
+    classDef ai fill:#FF1493,stroke:#fff,stroke-width:2px,color:#fff
+    classDef tool fill:#FFD700,stroke:#333,stroke-width:2px,color:#333
+    classDef output fill:#00ff41,stroke:#333,stroke-width:2px,color:#333
+    
+    class MAIN,ORCHESTRATOR primary
+    class OLLAMA,COMFYUI,WHISPER,GTTS ai
+    class FFMPEG,SKYFIELD tool
+    class SOCIAL,FILES output
+```
 
-astro_core/services/: Contient les modules logiques.
+### 🔄 Workflow Principal
 
-astro_mcp.py: Gère les calculs astraux et la génération de texte.
+1. **Interface Web** → Requête utilisateur (signe, date, format)
+2. **Orchestrateur IA** → Planification intelligente du workflow
+3. **Services MCP** → Exécution parallèle/séquentielle des tâches
+4. **Génération** → Horoscope (texte) + Audio (TTS) + Vidéo (ComfyUI)
+5. **Montage** → Synchronisation audio/sous-titres + Effets + Musique
+6. **Distribution** → Upload automatique sur plateformes sociales
 
-comfyui_mcp.py: Interface avec le serveur ComfyUI pour la génération vidéo.
+---
 
-video_mcp.py: Gère le montage (transcription, sous-titres, assemblage).
+## 🛠️ Installation & Configuration
 
-youtube_mcp.py: Gère la communication avec l'API YouTube.
+### Prérequis Système
 
-static/ & templates/: Fichiers du frontend web (JS, CSS, HTML).
+- **Python 3.10+**
+- **Node.js** (optionnel, pour outils de développement)
+- **FFmpeg** (obligatoire pour montage vidéo)
+- **Git**
 
-scripts/: Contient des outils de maintenance (nettoyage, etc.).
+### Installation Rapide
 
-## Technologies Utilisées 💻
-Backend: Python 3.10+, Flask
-
-IA (Texte): Ollama (avec des modèles comme Llama 3.1, Mistral, etc.)
-
-IA (Vidéo): ComfyUI avec AnimateDiff
-
-IA (Audio): gTTS (Text-to-Speech), openai-whisper (Transcription)
-
-Calculs Astronomiques: skyfield
-
-Montage Vidéo: ffmpeg
-
-Frontend: HTML5, CSS3, JavaScript (vanilla)
-
-Dépendances Python: requests, python-dotenv, mutagen, matplotlib, google-api-python-client, etc. (voir requirements.txt)
-
-## Installation & Configuration ⚙️
-Suivez ces étapes pour lancer le projet en local.
-
-### Prérequis
-Assurez-vous d'avoir les éléments suivants installés et en cours d'exécution :
-
-Python 3.10 ou supérieur.
-
-Git.
-
-Ollama : ollama.com. Après installation, tirez les modèles nécessaires (ex: ollama pull mistral).
-
-ComfyUI : Suivez les instructions d'installation sur le GitHub de ComfyUI.
-
-FFmpeg : Doit être installé et accessible depuis votre PATH.
-
-### Étapes d'installation
-Clonez le dépôt :
-
-Bash
-
-git clone https://github.com/KTCrisis/astrogenai.git
+```bash
+# 1. Cloner le projet
+git clone https://github.com/votre-username/astrogenai.git
 cd astrogenai
-Créez un environnement virtuel et activez-le :
 
-Bash
+# 2. Environnement virtuel
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou: venv\Scripts\activate  # Windows
 
-python -m venv .venv
-source .venv/bin/activate  # Sur Windows: .venv\Scripts\activate
-Installez les dépendances Python :
-
-Bash
-
+# 3. Dépendances Python
 pip install -r requirements.txt
-Configurez votre environnement :
 
-Copiez le fichier .env.example (s'il existe) ou créez un fichier .env à la racine du projet.
+# 4. Configuration
+cp .env.example .env
+# Éditer .env avec vos paramètres
 
-Remplissez-le avec vos configurations locales. Il doit contenir au minimum :
+# 5. Installation des services IA
+# Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.1:8b-instruct-q8_0
+ollama pull mistral:7b-instruct
 
-Code snippet
+# 6. Lancement
+python main.py
+```
 
-# Fichier .env
-FLASK_ENV="development"
+### Configuration Avancée
+
+#### Variables d'Environnement (.env)
+
+```env
+# === CONFIGURATION FLASK ===
 DEBUG=True
-HOST="0.0.0.0"
+HOST=0.0.0.0
 PORT=5000
 
-# URLs des services locaux
-OLLAMA_BASE_URL="http://127.0.0.1:11434"
-COMFYUI_SERVER="127.0.0.1:8188"
-Configurez l'API YouTube :
+# === SERVICES IA ===
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+COMFYUI_SERVER=127.0.0.1:8188
 
-Suivez les instructions de Google pour créer des identifiants API.
+# === MODÈLES ===
+OLLAMA_TEXT_MODEL=mistral:7b-instruct
+OLLAMA_CHAT_MODEL=llama3.1:8b-instruct-q8_0
 
-Placez votre fichier credentials.json dans astro_core/services/youtube/.
+# === AUTHENTIFICATION (Optionnel) ===
+AUTH_ENABLED=False
+AUTH_USERNAME=admin
+AUTH_PASSWORD=your-secure-password
+```
 
-Exécutez le script d'authentification une première fois pour générer le token.json :
+#### Configuration YouTube API
 
-Bash
+```bash
+# 1. Créer un projet Google Cloud
+# 2. Activer YouTube Data API v3
+# 3. Créer des identifiants OAuth 2.0
+# 4. Télécharger credentials.json
 
+# 5. Placer dans le projet
+mkdir -p astro_core/services/youtube
+cp ~/Downloads/credentials.json astro_core/services/youtube/
+
+# 6. Première authentification
 python astro_core/services/youtube/youtube_auth.py
-Placez les assets :
+```
 
-Ajoutez vos images de référence pour les signes dans assets/images/ (ex: aries_image.jpg).
+---
 
-Ajoutez votre fichier de musique de fond dans assets/music/.
+## 🎯 Utilisation
 
-## Lancement de l'Application 🚀
-Assurez-vous que vos serveurs Ollama et ComfyUI sont bien en cours d'exécution.
+### Interface Web
 
-Depuis la racine du projet, lancez le serveur Flask :
+Accédez à `http://localhost:5000` pour l'interface principale :
 
-Bash
+- **🔮 Horoscope Individuel** - Génération personnalisée
+- **📅 Horoscopes Quotidiens** - Batch pour tous les signes
+- **🌌 Carte du Ciel** - Visualisation astronomique
+- **🤖 Chat IA** - Assistant astrologique
+- **🎬 Générateur Vidéo** - Production de contenu
 
-python main.py
-Ouvrez votre navigateur et allez à l'adresse http://127.0.0.1:5000 (ou le port que vous avez configuré).
+### API REST
 
-## Scripts Utilitaires 🧹
-Des scripts de maintenance sont disponibles dans le dossier scripts/. Exécutez-les depuis la racine du projet.
+#### Endpoints Principaux
 
-Nettoyer les fichiers générés et/ou débloquer les fichiers :
+```http
+# Horoscopes
+POST /api/generate_single_horoscope
+POST /api/generate_daily_horoscopes
 
-Bash
+# Vidéos
+POST /api/comfyui/generate_video
+POST /api/workflow/complete_sign_generation
 
+# Chat IA
+POST /api/ollama/chat
+
+# Système
+GET /health
+```
+
+#### Exemple d'Utilisation API
+
+```python
+import requests
+
+# Générer un horoscope
+response = requests.post('http://localhost:5000/api/generate_single_horoscope', 
+    json={'sign': 'aries', 'date': '2024-12-21'})
+
+result = response.json()
+print(result['result']['horoscope_text'])
+```
+
+### Ligne de Commande
+
+```bash
+# Tests système
+python main.py test
+
+# Configuration actuelle
+python main.py config
+
+# Nettoyage des données
 python scripts/purge_data.py
-Le script vous proposera un menu pour choisir l'action à effectuer.
+```
 
-## Feuille de Route 🗺️
-[ ] Améliorer l'orchestrateur pour une gestion plus intelligente des workflows.
+---
 
-[ ] Ajouter plus de templates de vidéo pour ComfyUI.
+## 📁 Structure du Projet
 
-[ ] Mettre en place un système de comptes utilisateurs pour sauvegarder les thèmes astraux.
+```
+astrogenai/
+├── 📄 main.py                 # Serveur Flask principal
+├── ⚙️ config.py              # Configuration centralisée
+├── 📋 requirements.txt       # Dépendances Python
+├── 🌐 templates/             # Templates HTML
+├── 🎨 static/                # CSS, JS, images statiques
+├── 🧠 astro_core/            # Services MCP
+│   ├── services/
+│   │   ├── 🔮 astro_mcp.py           # Génération horoscopes
+│   │   ├── 🎬 video_mcp.py           # Montage vidéo
+│   │   ├── 🎨 comfyui_mcp.py         # Génération vidéo IA
+│   │   ├── 📤 youtube_mcp.py         # Upload YouTube
+│   │   ├── 🧠 orchestrator_mcp.py    # IA Orchestrateur
+│   │   └── 🌟 astrochart/            # Calculs astronomiques
+├── 📂 assets/                # Ressources (images, musique)
+├── 📂 output/                # Fichiers générés
+└── 🛠️ scripts/              # Outils de maintenance
+```
 
-[ ] Optimiser les performances de la génération vidéo en lot.
+---
 
-[ ] Créer une documentation complète de l'API.
+## 🚀 Workflows Automatisés
 
-## Licence
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
+### Workflow Simple : Horoscope + Audio
+
+```python
+# Génération automatique horoscope avec audio TTS
+POST /api/generate_single_horoscope_with_audio
+{
+    "sign": "leo",
+    "date": "2024-12-21",
+    "generate_audio": true
+}
+```
+
+### Workflow Complet : Production Vidéo
+
+```python
+# Pipeline complet : Texte → Audio → Vidéo → Montage
+POST /api/workflow/complete_sign_generation
+{
+    "sign": "scorpio",
+    "format": "youtube_short",
+    "add_music": true
+}
+```
+
+### Workflow Intelligent : Batch IA
+
+```python
+# Orchestration intelligente pour tous les signes
+POST /api/agent/intelligent_batch
+{
+    "signs": ["aries", "taurus", "gemini"],
+    "optimization_goals": ["quality", "speed"],
+    "include_upload": true
+}
+```
+
+---
+
+## 🔧 Dépendances & Services
+
+### Dépendances Python Critiques
+
+```txt
+flask>=2.3.0                 # Serveur web
+ollama>=0.1.0                # Modèles de langage
+openai-whisper>=20231117     # Transcription audio
+skyfield>=1.46               # Calculs astronomiques
+gtts>=2.4.0                  # Synthèse vocale
+matplotlib>=3.7.0            # Génération graphiques
+google-api-python-client     # API YouTube
+fastmcp>=0.1.0              # Protocol MCP
+```
+
+### Services Externes
+
+| Service | Port | Status | Description |
+|---------|------|--------|-------------|
+| **Ollama** | 11434 | 🟢 Requis | Modèles de langage locaux |
+| **ComfyUI** | 8188 | 🟡 Optionnel | Génération vidéo IA |
+| **YouTube API** | HTTPS | 🟡 Optionnel | Upload automatique |
+
+### Outils Système
+
+- **FFmpeg** : Montage vidéo (obligatoire)
+- **Git** : Gestion de version
+- **Python 3.10+** : Runtime principal
+
+---
+
+## 🧪 Tests & Développement
+
+### Lancement en Mode Développement
+
+```bash
+# Mode debug avec rechargement automatique
+FLASK_ENV=development python main.py
+
+# Tests des services
+python -c "
+import requests
+health = requests.get('http://localhost:5000/health').json()
+print('Services:', health['services'])
+"
+```
+
+### Tests de Santé
+
+```bash
+# Vérification complète du système
+curl http://localhost:5000/health | jq .
+
+# Test spécifique Ollama
+curl http://localhost:5000/api/ollama/models
+
+# Test génération horoscope
+curl -X POST http://localhost:5000/api/generate_single_horoscope \
+  -H "Content-Type: application/json" \
+  -d '{"sign": "aries"}'
+```
+
+---
+
+## 📈 Monitoring & Performance
+
+### Métriques Système
+
+L'endpoint `/health` fournit des informations détaillées :
+
+```json
+{
+  "status": "healthy",
+  "services": {
+    "ollama": {"status": true, "models": 5},
+    "astro": {"status": true},
+    "comfyui": {"status": false},
+    "video_generator": {"status": true},
+    "orchestrator": {"status": true}
+  },
+  "version": "2.1.0"
+}
+```
+
+### Optimisations Recommandées
+
+- **Cache Ollama** : Précharger les modèles fréquents
+- **Parallélisation** : Utiliser l'orchestrateur IA pour les workflows batch
+- **Stockage** : Nettoyer régulièrement avec `scripts/purge_data.py`
+
+---
+
+## 🤝 Contribution & Support
+
+### Contribution
+
+1. **Fork** le projet
+2. **Branch** feature (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. **Commit** (`git commit -am 'Ajout nouvelle fonctionnalité'`)
+4. **Push** (`git push origin feature/nouvelle-fonctionnalite`)
+5. **Pull Request**
+
+### Signalement de Bugs
+
+Utilisez les [GitHub Issues](https://github.com/votre-username/astrogenai/issues) avec :
+- Description détaillée
+- Logs de `/health`
+- Configuration système
+- Étapes de reproduction
+
+### Feuille de Route
+
+- [ ] **Tests unitaires** complets
+- [ ] **Docker** containerisation
+- [ ] **API externe** pour développeurs tiers
+- [ ] **Templates vidéo** personnalisables
+- [ ] **Multi-langues** (EN, ES, IT)
+- [ ] **Base de données** pour historique
+- [ ] **Authentification** avancée
+
+---
+
+## 📄 Licence
+
+Ce projet est sous licence **MIT**. Voir [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+## 🙏 Remerciements
+
+- **[Ollama](https://ollama.com)** - Modèles de langage locaux
+- **[ComfyUI](https://github.com/comfyanonymous/ComfyUI)** - Génération d'images/vidéos IA
+- **[Skyfield](https://rhodesmill.org/skyfield/)** - Calculs astronomiques précis
+- **[Flask](https://flask.palletsprojects.com)** - Framework web Python
+
+---
