@@ -138,7 +138,7 @@ body::before {
 /* Header de la sidebar */
 .sidebar-header {
     padding: 20px;
-    background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 50%, #FF1493 100%);
+    background: linear-gradient(135deg, var(--primary-purple) 0%, #4B0082 50%, var(--primary-pink) 100%);
     border-bottom: 1px solid #8A2BE2;
     text-align: center;
 }
@@ -208,7 +208,7 @@ body::before {
 
 .model-select:hover,
 .model-select:focus {
-    border-color: #FF1493;
+    border-color: var(--primary-pink);
     box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
     outline: none;
 }
@@ -576,6 +576,7 @@ body::before {
     border-bottom: 1px solid rgba(255, 20, 147, 0.3);
 }
 
+
 .sign-icon {
     width: 50px;
     height: 50px;
@@ -765,6 +766,17 @@ body::before {
     text-align: center;
 }
 
+.horoscope-result p,
+.video-preview p { /* <-- On ajoute simplement .video-preview p ici */
+    color: #E6E6FA;
+    margin: 8px 0;
+}
+
+.horoscope-result p strong,
+.video-preview p strong { /* <-- On fait de même pour le texte en gras */
+    color: #FFFFFF;
+}
+
 /* Prévisualisation constellation */
 .constellation-preview {
     background: linear-gradient(135deg, #0c0c0c 0%, #1a0033 50%, #2d1b69 100%);
@@ -799,6 +811,144 @@ body::before {
     margin-bottom: 15px;
     position: relative;
     z-index: 2;
+}
+/* =============================================================================
+   ASTROCHART IMAGE
+   ============================================================================= */
+
+/* Style pour l'image de la carte du ciel générée */
+.astrochart-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    border: 2px solid var(--primary-pink);
+    background: #000;
+}
+
+/* =============================================================================
+   LAYOUT À DEUX COLONNES POUR LA SECTION VIDÉO
+   ============================================================================= */
+
+.two-column-layout {
+    display: grid;
+    /* Crée deux colonnes : la 1ère prend 60% de l'espace, la 2ème le reste */
+    grid-template-columns: 60% 1fr;
+    gap: 25px; /* Espace entre les deux colonnes */
+    align-items: start; /* Aligne les deux colonnes en haut */
+    height: 100%;
+}
+
+.column-left {
+    /* La colonne de gauche contient les contrôles */
+    display: flex;
+    flex-direction: column;
+}
+
+.column-right {
+    /* La colonne de droite contient les résultats */
+    background: rgba(15, 15, 40, 0.8);
+    border: 2px solid var(--border-secondary);
+    border-radius: 15px;
+    padding: 25px;
+    height: 100%; /* Prend toute la hauteur disponible */
+    overflow-y: auto; /* Ajoute une barre de défilement si le contenu dépasse */
+    /*min-height: 500px; /* Hauteur minimale pour un bon affichage */
+}
+
+/* --- Responsive Design --- */
+/* Sur les écrans plus petits (moins de 1200px), on passe à une seule colonne */
+@media (max-width: 1200px) {
+    .two-column-layout {
+        grid-template-columns: 1fr; /* Une seule colonne */
+    }
+
+    .column-right {
+        min-height: 300px; /* Réduit la hauteur minimale sur mobile */
+        margin-top: 20px;
+    }
+}
+/* =============================================================================
+   AMÉLIORATION LAYOUT BOUTONS VIDÉO
+   ============================================================================= */
+
+/* Conteneur principal pour les groupes de boutons */
+.video-buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Espace entre les groupes */
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+/* Style pour chaque groupe d'actions */
+.action-group {
+    background: rgba(10, 10, 30, 0.5);
+    border: 1px solid var(--border-secondary);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+/* Titre de chaque groupe */
+.action-group-title {
+    color: var(--secondary-gold);
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+/* Conteneur flexible pour les boutons à l'intérieur d'un groupe */
+.button-wrapper {
+    display: flex;
+    flex-wrap: wrap; /* Permet aux boutons de passer à la ligne si nécessaire */
+    gap: 12px; /* Espace entre les boutons */
+}
+
+/* --- Ajustement de la taille et du style des boutons --- */
+
+/* Taille de base réduite pour tous les boutons de cette section */
+.video-buttons-container .astro-button {
+    padding: 10px 18px;
+    font-size: 12px;
+    border-radius: 20px;
+    min-width: auto; /* Permet aux boutons d'avoir une largeur naturelle */
+    flex-grow: 1; /* Permet aux boutons de grandir pour remplir l'espace */
+}
+
+/* Style pour les boutons principaux (fond plein) */
+.astro-button.button-primary {
+    background: linear-gradient(135deg, var(--primary-purple), var(--primary-pink));
+    color: white;
+}
+
+/* Style pour les boutons spéciaux (plus visibles) */
+.astro-button.button-special {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+}
+
+/* Style pour les boutons YouTube */
+.astro-button.button-youtube {
+    background: linear-gradient(135deg, #FF0000, #CC0000);
+    color: white;
+}
+
+/* Style pour les boutons secondaires (contour seul) */
+.astro-button.button-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--primary-purple);
+    box-shadow: none;
+}
+
+.astro-button.button-secondary:hover {
+    background: rgba(138, 43, 226, 0.2); /* var(--primary-purple) avec opacité */
+    color: white;
+    border-color: var(--primary-pink);
 }
 
 /* =============================================================================
