@@ -88,7 +88,6 @@ class VideoGenerator:
         self.ffmpeg_timeout = settings.FFMPEG_TIMEOUT
         self.temp_dir = self.output_dir / "temp_clips"
         self.individual_dir = self.output_dir / "individual"
-        self.whisper_model = settings.WHISPER_MODEL
         # Créer les dossiers nécessaires
         self.output_dir.mkdir(exist_ok=True, parents=True)
         self.temp_dir.mkdir(exist_ok=True)
@@ -200,7 +199,7 @@ class VideoGenerator:
         logger.info(f"Transcription Whisper: {os.path.basename(audio_path)}")
         try:
             import whisper
-            model = whisper.load_model(self.whisper_model)
+            model = whisper.load_model("medium")
             result = model.transcribe(audio_path, language="fr", word_timestamps=True)
             
             word_timings = []
@@ -930,7 +929,7 @@ if __name__ == "__main__":
     print(f"   • Dossier sortie: {status['directories']['output']}")
     print(f"   • Dossier vidéos: {status['directories']['video_input']}")
     print(f"   • Dossier audios: {status['directories']['audio_input']}")
-    print(f"   • Modèle Whisper: {self.whisper_model}")
+    print(f"   • Modèle Whisper: {"base"}")
     
     print(f"📦 Dépendances:")
     print(f"   • Whisper: {'✅' if status['whisper_available'] else '❌'}")

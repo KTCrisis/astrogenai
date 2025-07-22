@@ -38,8 +38,8 @@ class Settings:
     OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3:8b")
     OLLAMA_TIMEOUT = 10
     OLLAMA_CHAT_TIMEOUT = 60
-    WHISPER_MODEL = "base" # Modèle pour la transcription audio
-    
+
+
     # --- Définition Dynamique des Chemins ---
 
     # Dossier du code source
