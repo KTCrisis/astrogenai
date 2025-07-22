@@ -319,7 +319,7 @@ class VideoGenerator:
             if not audio_duration:
                 logger.error(f"Impossible de déterminer la durée audio pour {validated_sign}")
                 return None
-            
+            #Ajoute 1s de blanc apres l'audio
             safe_duration = audio_duration + 1.0
             
             # Chemin de sortie
@@ -336,12 +336,16 @@ class VideoGenerator:
             
             if add_music and self.music_file.exists():
                 cmd.extend(['-stream_loop', '-1', '-i', str(self.music_file)])  # Musique en boucle
-                
+                #Mise en place du fade out a la fin de la music
+                fade_duration = 3 
+                fade_start_time = safe_duration - fade_duration
                 filter_complex = (
                     f"{subtitle_filter}[v_out];"
                     "[2:a]volume=0.4[a_music];"
-                    "[1:a][a_music]amix=inputs=2:duration=longest[a_out]"
+                    f"[a_music]afade=t=out:st={fade_start_time:.2f}:d={fade_duration}[a_mix];"
+                    "[1:a][a_mix]amix=inputs=2:duration=longest[a_out]"
                 )
+
                 cmd.extend(['-filter_complex', filter_complex])
                 cmd.extend(['-map', '[v_out]', '-map', '[a_out]'])
             else:
