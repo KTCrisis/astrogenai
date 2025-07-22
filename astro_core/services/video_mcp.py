@@ -88,7 +88,7 @@ class VideoGenerator:
         self.ffmpeg_timeout = settings.FFMPEG_TIMEOUT
         self.temp_dir = self.output_dir / "temp_clips"
         self.individual_dir = self.output_dir / "individual"
-    
+        self.whisper_model = settings.WHISPER_MODEL
         # Créer les dossiers nécessaires
         self.output_dir.mkdir(exist_ok=True, parents=True)
         self.temp_dir.mkdir(exist_ok=True)
