@@ -35,7 +35,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def initialize_services():
     """
-    ✅ CORRECTION : Initialise et retourne les services disponibles dans un dictionnaire.
+    Initialise et retourne les services disponibles dans un dictionnaire.
     """
     print("--- Initialisation des services ---")
     services = {
@@ -84,7 +84,7 @@ def initialize_services():
     print("--- Fin de l'initialisation ---")
     return services
 
-# ✅ CORRECTION : Initialisation centralisée des variables globales
+# Initialisation centralisée des variables globales
 SERVICES = initialize_services()
 orchestrator = SERVICES.get('orchestrator')
 astro_generator = SERVICES.get('astro_generator')
@@ -181,10 +181,8 @@ class ValidationHelper:
 def handle_api_errors(f):
     """Décorateur pour gestion centralisée des erreurs API"""
     @wraps(f)
-    # Ce décorateur est le premier exécuté, il doit gérer les routes sync et async
     async def decorated_function(*args, **kwargs):
         try:
-            # Vérifie si la fonction enveloppée est une coroutine et l'attend si c'est le cas
             if asyncio.iscoroutinefunction(f):
                 return await f(*args, **kwargs)
             else:

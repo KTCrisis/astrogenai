@@ -80,14 +80,10 @@ class VideoGenerator:
     """Générateur de vidéos avec synchronisation audio/texte - Architecture hybride"""   
     
     def __init__(self):
-        # ✅ CORRECTION : Initialisation des chemins depuis l'objet settings
         self.output_dir = settings.FINAL_MONTAGE_DIR
         self.video_input_dir = settings.GENERATED_VIDEOS_DIR
         self.audio_input_dir = settings.GENERATED_AUDIO_DIR
         self.music_file = settings.MUSIC_DIR / "Io.wav"
-        
-        # ✅ CORRECTION : Initialisation des autres paramètres
-        self.whisper_model = settings.WHISPER_MODEL
         self.ffmpeg_font_path = settings.FFMPEG_FONT_PATH
         self.ffmpeg_timeout = settings.FFMPEG_TIMEOUT
         self.temp_dir = self.output_dir / "temp_clips"
