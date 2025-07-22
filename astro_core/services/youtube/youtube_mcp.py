@@ -11,12 +11,14 @@ import datetime
 import glob
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
+from config import settings
 
 # Dépendances Google API
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
+
 
 # Dépendance FastMCP
 try:
@@ -27,9 +29,9 @@ except ImportError:
     print("⚠️ FastMCP non disponible")
 
 # Configuration des chemins
-FINAL_MONTAGE_DIR = os.environ.get("VIDEO_MONTAGE_DIR", "final_montage")
-INDIVIDUAL_DIR = os.path.join(FINAL_MONTAGE_DIR, "individual")
-CREDENTIALS_DIR = os.environ.get("YOUTUBE_CREDENTIALS_DIR", "youtube_mcp")
+FINAL_MONTAGE_DIR = settings.FINAL_MONTAGE_DIR
+INDIVIDUAL_DIR = settings.INDIVIDUAL_DIR
+CREDENTIALS_DIR = settings.YOUTUBE_CREDENTIALS_DIR
 
 # =============================================================================
 # PARTIE 1 : MOTEUR D'UPLOAD 

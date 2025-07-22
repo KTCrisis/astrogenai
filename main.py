@@ -74,7 +74,7 @@ def initialize_services():
         print(f"❌ Erreur import Service Vidéo: {e}")
 
     try:
-        from astro_core.services.youtube_mcp import youtube_server
+        from astro_core.services.youtube.youtube_mcp import youtube_server
         services['youtube_service'] = youtube_server
         print("✅ Service YouTube importé")
     except ImportError as e:
@@ -537,21 +537,21 @@ async def health_check():
             },
             'astro': {
                 'status': astro_status,
-                'available': astro_generator,
+                'available': astro_generator is not None,
                 'error': astro_error
             },
             'comfyui': {
                 'status': comfyui_status,
-                'available': comfyui_generator
+                'available': comfyui_generator is not None
             },
             'video_generator': {
                 'status': video_status,
-                'available': video_generator,
+                'available': video_generator is not None,
                 'error': video_error
             },
             'orchestrator': {
                 'status': orchestrator_status,
-                'available': orchestrator,
+                'available': orchestrator is not None,
                 'error': orchestrator_error,
                 'capabilities': ['intelligent_planning', 'adaptive_execution', 'error_recovery'] if orchestrator_status else []
             }
@@ -1837,7 +1837,7 @@ def check_services_health():
                 channel_info = status['channel_info']
                 print(f"   ✅ Connecté - Chaîne: {channel_info.get('title', 'N/A')}")
                 print(f"   👥 Abonnés: {channel_info.get('subscribers', '0')}")
-                print(f"   📊 Vidéos disponibles: {status.get('available_videos_count', 0)}")
+                print(f"   📊 Vidéos prêtes à l'upload: {status['available_videos']['total_available']}")
                 print(f"   🆔 Channel ID: {channel_info.get('channel_id', 'N/A')[:15]}...")
             else:
                 print(f"   ⚠️  Connexion YouTube échouée: {status.get('error', 'Erreur inconnue')}")
@@ -1894,16 +1894,17 @@ def print_service_summary():
     # Statut YouTube MCP
     if youtube_service:
         try:
-            status = youtube_server.get_youtube_status()
+            status = youtube_service.get_youtube_status()
             if status['success'] and status['youtube_connected']:
                 services_status.append("✅ YouTube Upload")
             else:
-                services_status.append("⚠️  YouTube Upload")
-        except:
-            services_status.append("❌ YouTube Upload")
-    else:
-        services_status.append("❌ YouTube Upload")
-    
+                # Affiche l'erreur renvoyée par le service si la connexion a échoué
+                error_msg = status.get('error', 'Erreur inconnue')
+                services_status.append(f"⚠️  YouTube Upload ({error_msg})")
+        except Exception as e:
+            # Affiche l'erreur exacte si une exception se produit
+            services_status.append(f"❌ YouTube Upload (Exception: {e})")
+
     print("📋 SERVICES DISPONIBLES:")
     for status in services_status:
         print(f"   {status}")
@@ -1922,8 +1923,8 @@ def print_service_summary():
             print("   • pip install openai-whisper")
             print("   • Installez ffmpeg")
         if "❌ YouTube Upload" in services_status:
-            print("   • Vérifiez le dossier youtube_mcp/")
-            print("   • settingsurez credentials YouTube API")
+            print("   • Vérifiez le dossier youtube/")
+            print("   • Vérifiez credentials YouTube API")
 
 def print_api_endpoints():
     """Affiche la liste des endpoints API disponibles"""

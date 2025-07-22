@@ -42,6 +42,9 @@ class Settings:
     
     # --- Définition Dynamique des Chemins ---
 
+    # Dossier du code source
+    SOURCE_CODE_DIR = BASE_DIR / "astro_core"
+
     # Dossiers d'entrée (Assets)
     ASSETS_DIR = BASE_DIR / "assets"
     INPUT_IMAGES_DIR = ASSETS_DIR / "images" # Pour ControlNet
@@ -53,15 +56,16 @@ class Settings:
     GENERATED_AUDIO_DIR = OUTPUT_DIR / "generated_audio"
     GENERATED_VIDEOS_DIR = OUTPUT_DIR / "generated_video"
     FINAL_MONTAGE_DIR = OUTPUT_DIR / "final_montage"
+    INDIVIDUAL_DIR = OUTPUT_DIR / "final_montage" / "individual"
+
+    #Credentials
+    YOUTUBE_CREDENTIALS_DIR = SOURCE_CODE_DIR / "services" / "youtube"
 
 
     # Dossiers Web (Flask)
     STATIC_DIR = BASE_DIR / "static"
     STATIC_CHARTS_DIR = STATIC_DIR / "charts"
     TEMPLATES_DIR = BASE_DIR / "templates"
-    
-    # Dossier du code source
-    SOURCE_CODE_DIR = BASE_DIR / "astro_core"
     
     # Chemin vers la police pour le montage vidéo (IMPORTANT)
     FFMPEG_TIMEOUT = 300

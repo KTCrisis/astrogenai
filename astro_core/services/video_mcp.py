@@ -645,7 +645,6 @@ class VideoGenerator:
             "whisper_available": self.whisper_available,
             "ffmpeg_available": self.ffmpeg_available,
             "fastmcp_available": FASTMCP_AVAILABLE,
-            "config": asdict(self.config),
             "directories": {
                 "output": str(self.output_dir),
                 "video_input": str(self.video_input_dir),
