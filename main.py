@@ -81,6 +81,16 @@ def initialize_services():
         print(f"❌ Erreur import Service YouTube: {e}")
     except Exception as e:
         print(f"❌ Erreur YouTube (authentification): {e}")
+
+    try:
+        from astro_core.services.tiktok.tiktok_mcp import tiktok_server
+        services['tiktok_service'] = tiktok_server
+        print("✅ Service TikTok importé")
+    except ImportError as e:
+        print(f"❌ Erreur import Service TikTok: {e}")
+    except Exception as e:
+        print(f"❌ Erreur Tiktok: {e}")
+
     print("--- Fin de l'initialisation ---")
     return services
 
@@ -91,6 +101,7 @@ astro_generator = SERVICES.get('astro_generator')
 comfyui_generator = SERVICES.get('comfyui_generator')
 video_generator = SERVICES.get('video_generator')
 youtube_service = SERVICES.get('youtube_service')
+tiktok_service = SERVICES.get('tiktok_service')
 
 # =============================================================================
 # INITIALISATION FLASK 
@@ -562,6 +573,20 @@ async def health_check():
     })
 
 # =============================================================================
+# ROUTES POUR LES PAGES LÉGALES
+# =============================================================================
+
+@app.route('/terms-of-service')
+def terms_page():
+    """Sert la page des conditions d'utilisation."""
+    return render_template('terms.html')
+
+@app.route('/privacy-policy')
+def privacy_page():
+    """Sert la page de politique de confidentialité."""
+    return render_template('privacy.html')
+
+# =============================================================================
 # API ENDPOINT AGENT ORCHESTRATOR
 # =============================================================================
 
@@ -712,7 +737,9 @@ async def api_smart_single_generation():
                 "astro": SERVICES.get('astro_generator', False),
                 "comfyui": SERVICES.get('comfyui_generator', False),
                 "video": SERVICES.get('video_generator', False),
-                "youtube": SERVICES.get('youtube_service', False)
+                "youtube": SERVICES.get('youtube_service', False),
+                "tiktok": SERVICES.get('tiktok_service', False)
+
             }
         },
         "optimization_goals": data.get('optimization_goals', ['quality', 'personalization'])
@@ -940,6 +967,7 @@ async def api_get_sign_metadata():
     
     result = await AstroService.call_astro_tool("get_sign_metadata", arguments)
     return jsonify(result)
+
 # =============================================================================
 # API ENDPOINTS - ASTROCHART
 # =============================================================================
@@ -1004,7 +1032,7 @@ async def api_generate_chart_image():
         raise Exception(f"Erreur lors de la génération de la carte: {str(e)}")
         
 # =============================================================================
-# API ENDPOINTS - OLLAMA CHAT (inchangés)
+# API ENDPOINTS - OLLAMA CHAT 
 # =============================================================================
 
 @app.route('/api/ollama/models', methods=['GET'])
@@ -1082,7 +1110,7 @@ Réponse:"""
         }), 503
 
 # =============================================================================
-# API ENDPOINTS - COMFYUI VIDÉO (inchangés)
+# API ENDPOINTS - COMFYUI VIDÉO 
 # =============================================================================
 
 @app.route('/api/comfyui/status', methods=['GET'])
@@ -1694,6 +1722,32 @@ async def api_youtube_available_videos():
         return jsonify({
             "success": False,
             "error": f"Erreur: {str(e)}"
+        }), 500
+
+
+# =============================================================================
+# API ENDPOINTS - TIKTOK UPLOAD (NOUVELLE SECTION)
+# =============================================================================
+
+@app.route('/api/tiktok/upload_sign/<sign>', methods=['POST'])
+@handle_api_errors
+@require_service('tiktok_service')
+async def api_upload_sign_tiktok(sign):
+    """Upload la vidéo d'un signe sur TikTok."""
+    try:
+        # La logique d'upload est synchrone, nous l'exécutons dans un thread pour ne pas bloquer
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(None, tiktok_server.upload_sign_video, sign)
+        
+        if result.get("success"):
+            return jsonify(result)
+        else:
+            return jsonify(result), 500
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Erreur upload TikTok: {str(e)}"
         }), 500
 
 # =============================================================================

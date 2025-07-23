@@ -5,7 +5,7 @@
 
 astro_core/services/youtube/token.json
 astro_core/services/youtube/credentials.json
-
+astro_core/services/tiktok/credentials.json
 # Dossiers de sortie principaux (selon votre config.py)
 /output/
 /static/charts/

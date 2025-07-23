@@ -446,6 +446,29 @@ body::before {
 }
 
 /* =============================================================================
+   FOOTER
+   ============================================================================= */
+.main-footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: auto; /* Pousse le footer en bas */
+    color: rgba(230, 230, 250, 0.5);
+    font-size: 12px;
+}
+
+.footer-nav a {
+    color: rgba(230, 230, 250, 0.7);
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+.footer-nav a:hover {
+    color: #FFD700;
+}
+
+
+/* =============================================================================
    7. BOUTONS ET ACTIONS
    ============================================================================= */
 
@@ -937,6 +960,16 @@ body::before {
     color: white;
 }
 
+/* Style pour les boutons Tiktok */
+.button-tiktok {
+    background: linear-gradient(145deg, #25f4ee, #000000);
+    color: white;
+    border: 1px solid #25f4ee;
+}
+
+.button-tiktok:hover {
+    box-shadow: 0 0 12px #25f4ee;
+}
 /* Style pour les boutons secondaires (contour seul) */
 .astro-button.button-secondary {
     background: transparent;

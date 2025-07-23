@@ -633,6 +633,7 @@ function addVideoButtonsAndListeners() {
         { group: 'group-batch-actions', text: '🚀 Batch Clips Vidéo', action: generateComfyUIBatchVideos, class: 'button-secondary' },
         { group: 'group-batch-actions', text: '📤 Upload ce Signe', action: uploadCurrentSignToYouTube, class: 'button-youtube' },
         { group: 'group-batch-actions', text: '📺 Upload Batch YouTube', action: uploadBatchToYouTube, class: 'button-youtube' },
+        { group: 'group-batch-actions', text: '🎵 Upload ce Signe (TikTok)', action: uploadCurrentSignToTikTok, class: 'button-tiktok' },
 
         // Groupe 3: Utilitaires
         { group: 'group-utility-actions', text: '🔍 Statut ComfyUI', action: checkComfyUIStatus, class: 'button-secondary' },
@@ -888,6 +889,34 @@ async function uploadBatchToYouTube() {
         });
         resultsHtml += `</div>`;
         resultDiv.innerHTML = resultsHtml;
+    }
+}
+
+async function uploadCurrentSignToTikTok() {
+    const sign = document.getElementById('video-sign').value;
+    if (!sign) {
+        alert('Veuillez sélectionner un signe astrologique.');
+        return;
+    }
+    if (!confirm(`Uploader la vidéo de ${signNames[sign]} sur TikTok ?`)) return;
+
+    const resultDiv = document.getElementById('video-result');
+    const response = await makeApiRequest(
+        `/api/tiktok/upload_sign/${sign}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+        },
+        'video-loading',
+        'video-result'
+    );
+
+    if (response) {
+        alert(`✅ Upload TikTok réussi !\nTitre: ${response.title}`);
+        resultDiv.innerHTML = `<div class="horoscope-result">
+            <h3 style="color: #00ff41;">✅ Vidéo uploadée sur TikTok !</h3>
+            <p><strong>Titre :</strong> ${response.title}</p>
+        </div>`;
     }
 }
 
