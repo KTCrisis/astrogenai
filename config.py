@@ -23,7 +23,7 @@ class Settings:
     # Authentification (désactivée par défaut)
     AUTH_ENABLED = False
     AUTH_USERNAME = "admin"
-    AUTH_PASSWORD = "astro2024"
+    AUTH_PASSWORD = "****"
 
     # --- Configuration des Services Externes ---
     OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
