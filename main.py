@@ -289,6 +289,7 @@ class AstroService:
                 "date": horoscope_result.date,
                 "horoscope": horoscope_result.horoscope_text,
                 "horoscope_text": horoscope_result.horoscope_text,
+                "title_theme": horoscope_result.title_theme,
                 "word_count": horoscope_result.word_count,
                 "lunar_influence": horoscope_result.lunar_influence_score,
                 "astral_context": {
@@ -1276,8 +1277,6 @@ async def api_comfyui_preview_prompt():
         "estimated_duration": "2-3 minutes"
     })
 
-
-
 @app.route('/api/comfyui/download_video/<path:video_path>')
 @handle_api_errors
 @require_service('comfyui_generator')
@@ -1545,7 +1544,27 @@ async def _run_complete_sign_workflow(sign, date, format_name, add_music):
             results['synchronized_video'] = {"success": False, "error": "Montage synchronisé échoué"}
     else:
         results['synchronized_video'] = {"success": False, "error": "Video generator non disponible"}
-        
+   # Étape 4: Préparation des métadonnées YouTube
+    if SERVICES['youtube_service']:
+        print(f"📝 Étape 4: Préparation des métadonnées YouTube pour {sign}")
+        theme_for_title = None
+        if results.get('horoscope', {}).get('success'):
+            horoscope_obj = results['horoscope'].get('result')
+            if horoscope_obj:
+                theme_for_title = horoscope_obj.get('title_theme')
+            
+        metadata = youtube_service.uploader.create_astro_metadata(
+            sign=sign,
+            date=date,
+            title_theme=theme_for_title 
+        )
+        results['youtube_metadata'] = {
+            "success": True,
+            "title": metadata.title,
+            "description": metadata.description
+        }
+        print(f"✅ Titre YouTube prévu : \"{metadata.title}\"")
+          
     return results
 
 @app.route('/api/workflow/complete_sign_generation', methods=['POST'])

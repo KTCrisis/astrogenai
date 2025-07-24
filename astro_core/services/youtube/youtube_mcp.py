@@ -75,7 +75,6 @@ class YouTubeUploader:
             creds = Credentials.from_authorized_user_file(self.token_file)
 
             if not creds.valid:
-                # Idéalement, il faudrait gérer le refresh ici, mais pour l'instant on demande de relancer l'auth.
                 raise Exception("Token expiré ou invalide. Veuillez relancer l'authentification.")
 
             self.youtube_service = build('youtube', 'v3', credentials=creds)
@@ -83,10 +82,10 @@ class YouTubeUploader:
 
         except Exception as e:
             print(f"❌ Erreur d'authentification YouTube : {e}")
-            self.youtube_service = None # S'assurer que le service n'est pas utilisable
+            self.youtube_service = None 
             raise
 
-    def create_astro_metadata(self, sign: str, date: Optional[str] = None, is_complete_video: bool = False) -> VideoMetadata:
+    def create_astro_metadata(self, sign: str, date: Optional[str] = None, title_theme: Optional[str] = None, is_complete_video: bool = False) -> VideoMetadata:
         """Génère des métadonnées optimisées pour les vidéos d'horoscope."""
         if not date:
             date_obj = datetime.date.today()
@@ -102,7 +101,7 @@ class YouTubeUploader:
             title = f"🔮 Horoscope Complet du {formatted_date} - Tous les Signes Astrologiques | Prédictions AI"
             description = f"""🌟 Découvrez votre horoscope complet pour tous les signes du zodiaque pour le {formatted_date} !
 
-Cette vidéo, entièrement générée par une intelligence artificielle, vous offre un guide astral quotidien pour naviguer les énergies cosmiques.
+Cette vidéo, entièrement générée par AstroGenAI, vous offre un guide astral quotidien pour naviguer les énergies cosmiques.
 
 ✨ DANS CETTE VIDÉO ✨
 - Prédictions détaillées pour les 12 signes.
@@ -131,10 +130,13 @@ Abonnez-vous pour ne manquer aucune prédiction !
                 'capricorn': 'Capricorne ♑', 'aquarius': 'Verseau ♒', 'pisces': 'Poissons ♓'
             }
             sign_name = sign_names.get(sign.lower(), sign.title())
-            title = f"🔮 Horoscope {sign_name} du {formatted_date} | Prédictions IA Personnalisées"
+            if title_theme:
+                title = f"🔮 {sign_name} | {title_theme} | Horoscope du {formatted_date}"
+            else:
+                title = f"🔮 Horoscope {sign_name} du {formatted_date} | Prédictions IA Personnalisées"
             description = f"""🌟 Découvrez votre horoscope personnalisé pour le signe du {sign_name} en date du {formatted_date} !
 
-Laissez notre intelligence artificielle astrologique vous guider à travers les énergies cosmiques du jour.
+Laissez notre intelligence artificielle AstroGenAI vous guider à travers les énergies cosmiques du jour.
 
 #Horoscope #{sign.title()} #Astrologie #AstroGenAI #IA #PrédictionsQuotidiennes #{sign_name.split()[0]}"""
             tags = ["horoscope", "astrologie", f"horoscope {sign.lower()}", sign.lower(), "ia", "prédictions", "guidance", "zodiaque"]
@@ -276,14 +278,19 @@ class YouTubeMCPServer:
         
         return result
 
-    def upload_individual_video(self, sign: str, privacy: str = "private") -> Dict[str, Any]:
+    def upload_individual_video(self, sign: str, privacy: str = "private", title_theme: Optional[str] = None, date: Optional[str] = None) -> Dict[str, Any]:
         """Prépare et upload la vidéo pour un signe."""
         self._check_uploader()
         video_path = self.find_latest_video(INDIVIDUAL_DIR, f"{sign}_final_*.mp4")
         if not video_path:
             return {"success": False, "error": f"Aucune vidéo finale trouvée pour {sign}."}
 
-        metadata = self.uploader.create_astro_metadata(sign)
+        metadata = self.uploader.create_astro_metadata(
+            sign=sign, 
+            date=date, 
+            title_theme=title_theme
+        )
+        
         metadata.privacy_status = privacy
         
         result = self.uploader.upload_video(video_path, metadata)
@@ -301,6 +308,33 @@ class YouTubeMCPServer:
         
         result = self.uploader.upload_video(video_path, metadata)
         return {"type": "complete_horoscope", **result.__dict__}
+
+    def upload_batch_videos(self, signs: Optional[List[str]] = None, privacy: str = "private", horoscopes_data: Optional[Dict] = None, date: Optional[str] = None) -> dict:
+        """Upload en lot plusieurs vidéos avec titres dynamiques."""
+        self._check_uploader()
+        horoscopes_data = horoscopes_data or {}
+        
+        target_signs = signs if signs else self.signs_order
+        batch_details = []
+        
+        for sign in target_signs:
+            horoscope_info = horoscopes_data.get(sign, {})
+            horoscope_obj = horoscope_info.get('horoscope')
+            
+            title_theme = horoscope_obj.title_theme if horoscope_obj else None
+            
+            # Appel à la méthode d'upload individuelle de la classe
+            result = self.upload_individual_video(sign, privacy, title_theme, date)
+            batch_details.append(result)
+            
+        successful = sum(1 for r in batch_details if r.get("success"))
+        return {
+            "summary": f"{successful}/{len(target_signs)} uploads réussis.",
+            "total_requested": len(target_signs),
+            "successful_uploads": successful,
+            "failed_uploads": len(target_signs) - successful,
+            "details": batch_details
+        }
 
     def get_youtube_status(self) -> Dict[str, Any]:
         """Retourne l'état de la connexion YouTube et des vidéos."""

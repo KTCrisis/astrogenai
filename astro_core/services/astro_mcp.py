@@ -103,7 +103,7 @@ class HoroscopeResult:
     generation_timestamp: str
     word_count: int
     astrochart_data: Optional[Dict] = None  
-
+    title_theme: Optional[str] = None 
 # =============================================================================
 # CLASS ASTROCHART IMAGE GENERATOR
 # =============================================================================
@@ -302,19 +302,16 @@ class AstroGenerator:
         """Valide et normalise un signe astrologique."""
         if not sign:
             raise ValueError("Signe manquant")
-        
         sign_lower = sign.lower().strip()
         if sign_lower not in self.signs_data:
             available = ", ".join(self.signs_data.keys())
             raise ValueError(f"Signe invalide '{sign}'. Disponibles: {available}")
-        
         return sign_lower
 
     def _validate_date(self, date_str: Optional[str]) -> datetime.date:
         """Valide et parse une date."""
         if not date_str:
             return datetime.date.today()
-        
         try:
             return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
         except ValueError:
@@ -510,7 +507,7 @@ class AstroGenerator:
             logger.info(f"--- Prompt {'enrichi' if astrochart_data else 'standard'} envoyé à Ollama ---")
             
             horoscope_text = await self._call_ollama_with_retry(prompt)
-            
+            title_theme = await self._extract_title_theme(horoscope_text)
             # Calculer l'influence lunaire
             lunar_influence = self.calculate_lunar_influence(validated_sign, validated_date)
             
@@ -523,7 +520,8 @@ class AstroGenerator:
                 lunar_influence_score=lunar_influence,
                 generation_timestamp=datetime.datetime.now().isoformat(),
                 word_count=len(horoscope_text.split()),
-                astrochart_data=astrochart_data  # ✅ AJOUTER SI VOUS AVEZ MODIFIÉ LA DATACLASS
+                astrochart_data=astrochart_data,
+                title_theme=title_theme
             )
             
             # Génération audio optionnelle
@@ -650,6 +648,37 @@ class AstroGenerator:
 
         logger.info(f"Résumé hebdomadaire généré. Durée audio : {audio_duration:.2f}s")
         return script_text, audio_path, audio_duration
+        
+    async def _extract_title_theme(self, horoscope_text: str) -> str:
+        """Utilise Ollama pour extraire une phrase clé pour le titre."""
+        prompt = f"""
+        Voici un horoscope. Résume son idée principale en une phrase courte et percutante de 3 à 5 mots maximum, idéale pour un titre de vidéo YouTube.
+        Ne mentionne pas le signe astrologique.
+        
+        ### INSTRUCTIONS STRICTES ###
+        1. La phrase doit être en FRANÇAIS UNIQUEMENT.
+        2. La phrase doit contenir entre 3 et 5 mots.
+        3. N'ajoute PAS l'année, la date, ou le nom du signe.
+        4. Réponds UNIQUEMENT avec la phrase, sans guillemets ni préfixe.
+        5. Ne fournis AUCUNE traduction, explication ou commentaire.
+        
+        ### EXEMPLE ###
+        Horoscope: "Cher Lion, une opportunité financière inattendue se présente. Saisissez-la avec audace mais prudence."
+        Phrase pour le titre: Une opportunité financière à saisir
+
+        ### HOROSCOPE À RÉSUMER ###
+        Horoscope: "{horoscope_text}"
+        
+        ### PHRASE POUR LE TITRE ###
+
+        """
+        try:
+            theme = await self._call_ollama_with_retry(prompt)
+            return theme.strip().replace('"', '').replace("Phrase pour le titre:", "").strip()
+        except Exception as e:
+            logger.warning(f"Échec de l'extraction du thème, utilisation de fallback: {e}")
+            # En cas d'échec, on retourne une chaîne vide ou un titre générique
+            return "Votre Horoscope par AI"
 
     def generate_tts_audio(self, text: str, filename: str) -> Tuple[Optional[str], float]:
         """Génère un fichier audio à partir du texte - Version améliorée."""
