@@ -437,8 +437,8 @@ class AstroGenerator:
     INSTRUCTIONS:
     - Crée un horoscope de {self.horoscope_min_words}-{self.horoscope_max_words} mots
     - UTILISE les positions et aspects RÉELS ci-dessus (pas des généralités)
+    - N'INDIQUE pas les orbes et degrés comme par exemple : Trine (30°) ou Sextile (60°) ou EXACT quand tu réponds, donne juste Trine, Sextile
     - Mentionne 1 seul aspect le plus significatif s'ils concernent le signe
-    - N'INDIQUE pas les orbes et degrés comme par exemple : Trine (30°) ou Sextile (60°) quand tu réponds, donne juste Trine, Sextile
     - Adapte selon la phase lunaire actuelle
     - Ta réponse doit être en français uniquement
     - Termine par une phrase complète avec ponctuation

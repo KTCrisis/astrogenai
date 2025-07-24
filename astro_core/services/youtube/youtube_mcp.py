@@ -116,8 +116,8 @@ Cette vidéo, entièrement générée par AstroGenAI, vous offre un guide astral
 
 Abonnez-vous pour ne manquer aucune prédiction !
 
-#Horoscope #Astrologie #AstroGenAI #IA #HoroscopeComplet #Zodiaque #Prédictions #guidancespirituelle"""
-            tags = ["horoscope", "astrologie", "horoscope complet", "tous les signes", "ia", "ai", "prédictions", "zodiaque", "guidance"]
+#Horoscope #Astrologie #AstroGenAI #AI"""
+            tags = ["horoscope", "astrologie", "ia"]
             category_id = "24" # Entertainment
         else:
 # =============================================================================
@@ -138,8 +138,8 @@ Abonnez-vous pour ne manquer aucune prédiction !
 
 Laissez notre intelligence artificielle AstroGenAI vous guider à travers les énergies cosmiques du jour.
 
-#Horoscope #{sign.title()} #Astrologie #AstroGenAI #IA #PrédictionsQuotidiennes #{sign_name.split()[0]}"""
-            tags = ["horoscope", "astrologie", f"horoscope {sign.lower()}", sign.lower(), "ia", "prédictions", "guidance", "zodiaque"]
+#Horoscope #{sign.title()} #Astrologie #IA #Horoscope #{sign_name.split()[0]}"""
+            tags = ["horoscope", "astrologie", f"horoscope {sign.lower()}", sign.lower()]
             category_id = "22" # People & Blogs
 
         return VideoMetadata(title=title, description=description, tags=tags, category_id=category_id)
