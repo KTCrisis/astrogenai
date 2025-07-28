@@ -366,9 +366,6 @@ if FASTMCP_AVAILABLE:
         """
         try:
             target_date = datetime.datetime.strptime(date, '%Y-%m-%d').date() if date else datetime.date.today()
-            
-            # Définir le chemin de sauvegarde dans le dossier static
-            # Assurez-vous que ce dossier existe !
             output_dir = Path("static/charts")
             output_dir.mkdir(parents=True, exist_ok=True)
             
