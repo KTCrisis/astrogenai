@@ -17,7 +17,8 @@ class BasePromptTemplates:
         """Règles strictes pour le français"""
         return """RÈGLES LINGUISTIQUES STRICTES:
             - Ta réponse doit être en français uniquement
-            - PAS D'EMOJI
+            - INTERDICTION ABSOLUE d'utiliser des emojis (🌟✨🔮🌕 etc.)
+            - Le texte sera lu par synthèse vocale, reste textuel uniquement
             - Ne donne pas les date comme 2025-08-03 mais dit plutot le 3 aout
             - Utilisez EXCLUSIVEMENT les noms français des signes :
             * Bélier (JAMAIS Aries)
@@ -32,7 +33,13 @@ class BasePromptTemplates:
             * Capricorne (JAMAIS Capricorn)
             * Verseau (JAMAIS Aquarius ou Aigle)
             * Poissons (JAMAIS Pisces)
-            - Si tu écris un nom anglais, c'est une ERREUR GRAVE"""
+            - Si tu écris un nom anglais, c'est une ERREUR GRAVE
+            NOMS DE SIGNES EXACTS (ZÉRO TOLÉRANCE D'ERREUR):
+            - Bélier, Taureau, Gémeaux, Cancer
+            - Lion, Vierge, Balance, Scorpion  
+            - Sagittaire, Capricorne, Verseau, Poissons
+            - JAMAIS Scorpionn, Capricornee, ou autres variantes
+            """
 
     @staticmethod
     def get_length_requirements(min_words: int):

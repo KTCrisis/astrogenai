@@ -26,28 +26,28 @@ class WeeklyPromptTemplates:
 
         STRUCTURE OBLIGATOIRE DE L'INTRODUCTION:
         
-        ACCUEIL CHALEUREUX (100 mots):
+        ACCUEIL CHALEUREUX :
         -"Bienvenue dans votre Guide AstroGenAI hebdomadaire !"
         - Salutation personnalisée selon la saison
 
-        ACCROCHE COSMIQUE (150 mots):
+        ACCROCHE COSMIQUE :
         - Métaphore poétique sur l'énergie de la semaine
         - Image évocatrice du ciel étoilé actuel
         - Teasing de l'événement le plus spectaculaire
 
-        ÉVÉNEMENT PHARE (300 mots):
+        ÉVÉNEMENT PHARE:
         - Description détaillée de l'événement cosmique majeur
         - Contexte historique ou symbolique
         - Pourquoi c'est exceptionnel cette semaine
         - Impact émotionnel et spirituel attendu
 
-        PREVIEW DE LA VIDÉO (200 mots):
+        PREVIEW DE LA VIDÉO :
         - Annonce des sections à venir avec enthousiasme
         - Promesse de révélations personnalisées par signe
         - Mention des rituels/pratiques qui seront partagés
         - Invitation à rester jusqu'à la fin
 
-        TRANSITION VERS LE CONTENU (50 mots):
+        TRANSITION VERS LE CONTENU :
         - Phrase de transition élégante vers la suite
         - Maintien de l'engagement
 
@@ -94,71 +94,55 @@ class WeeklyPromptTemplates:
 
     @staticmethod
     def get_signs_section_template():
-        """Template pour conseils par signe (1200 mots)"""
+        """Template pour conseils par signe"""
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
 
-        MISSION: Écris UNIQUEMENT les conseils détaillés par signe de 1200 mots minimum.
+        MISSION: Écris le conseil hebdomadaire détaillé pour le signe {{sign_name}} uniquement.
 
         CONTEXTE ÉNERGÉTIQUE: {{events}}
 
-        {base.get_length_requirements(2000)}
+        {base.get_length_requirements(1000)}
         {base.get_french_language_rules()}
         {base.get_astrological_language_rules()}
         {base.get_youtube_tone()}
+  
+        SIGNE À TRAITER: {{sign_name}} ({{sign_dates}})
+        PÉRIODE: {{period}}
+        CONTEXTE ÉNERGÉTIQUE: {{events}}
         
-        RÈGLES ABSOLUES - TRÈS IMPORTANT:
-        - Tu DOIS traiter EXACTEMENT les 12 signes ci-dessous
-        - Tu ne peux PAS sauter un seul signe
-        - Tu ne peux PAS conclure avant d'avoir traité tous les signes
-        - Chaque signe doit avoir environ 100 mots
+        MÉTADONNÉES DU SIGNE:
+        - Élément: {{element}}
+        - Planète maîtresse: {{ruling_planet}}
+        - Traits principaux: {{traits}}
 
-        LISTE OBLIGATOIRE DES 12 SIGNES À TRAITER:
-        1. Bélier : [100 mots minimum]
-        2. Taureau : [100 mots minimum]
-        3. Gémeaux : [100 mots minimum]
-        4. Cancer : [100 mots minimum]
-        5. Lion : [100 mots minimum]
-        6. Vierge : [100 mots minimum]
-        7. Balance : [100 mots minimum]
-        8. Scorpion : [100 mots minimum]
-        9. Sagittaire : [100 mots minimum]
-        10. Capricorne : [100 mots minimum]
-        11. Verseau : [100 mots minimum]
-        12. Poissons : [100 mots minimum]
+        RÈGLES STRICTES:
+        Écris UNIQUEMENT pour {{sign_name}}
+        Format: "{{sign_name}} : [contenu]"
+        PAS de mention d'autres signes
+        Contenu substantiel et personnalisé
+    
 
-        FORMAT: "Bélier : ...", "Taureau : ...", etc.
+        CONTENU REQUIS:
+        Énergie principale de la semaine pour ce signe
+        Connexion avec les événements cosmiques majeurs
+        Un défi spécifique lié aux traits du signe
+        Une opportunité concrète à saisir
+        Conseil pratique avec timing précis, jour de la semaine le plus favorable
+        Ce qu'il faut éviter cette semaine
 
-        CONTENU POUR CHAQUE SIGNE:
-        ÉNERGIE DE LA SEMAINE (30 mots)
-        - Comment cette semaine résonne avec l'énergie du signe
-        - Connexion avec les événements cosmiques majeurs
-        
-        DÉFI PRINCIPAL (25 mots)
-        - Obstacle ou tension à surmonter
-        - Aspect planétaire qui influence négativement
-        
-        OPPORTUNITÉ DORÉE (30 mots)
-        - Ce qui est favorisé cette semaine
-        - Domaine de vie à privilégier (amour, travail, santé, créativité)
-        
-        CONSEIL PRATIQUE CONCRET (20 mots)
-        - Action spécifique à entreprendre
-        - Jour de la semaine le plus favorable
-        
-        À ÉVITER ABSOLUMENT (10 mots)
-        - Comportement ou décision à éviter
+        STYLE:
+        - Adapté aux traits du signe ({{traits}})
+        - Référence à l'élément {{element}} si pertinent
+        - Ton bienveillant et motivant
+        - Évite les généralités, sois spécifique
 
-        VÉRIFICATION FINALE:
-        Avant de terminer, compte les signes. Tu dois avoir EXACTEMENT 12 signes.
-        Si tu en as moins de 12, CONTINUE jusqu'à avoir les 12.
-
-        Commence maintenant par le Bélier et traite TOUS les 12 signes:"""
+        Écris maintenant le conseil pour {{sign_name}}:"""
 
     @staticmethod
     def get_conclusion_section_template():
-        """Template pour conclusion et rituels (500 mots)"""
+        """Template pour conclusion et rituels"""
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
@@ -174,23 +158,23 @@ class WeeklyPromptTemplates:
 
         STRUCTURE OBLIGATOIRE:
 
-        SYNTHÈSE INSPIRANTE (100 mots):
+        SYNTHÈSE INSPIRANTE:
         - Récapitulatif poétique de l'énergie de la semaine
         - Message d'espoir et d'encouragement
         - Lien entre tous les signes dans cette énergie commune
 
-        RITUEL HEBDOMADAIRE GUIDÉ (200 mots):
+        RITUEL HEBDOMADAIRE GUIDÉ :
         - Méditation spécifique à la semaine (étapes détaillées)
         - Affirmations à répéter quotidiennement
         - Pratique énergétique simple (respiration, visualisation)
         - Meilleur moment pour pratiquer
 
-        CONSEILS PRATIQUES UNIVERSELS (100 mots):
+        CONSEILS PRATIQUES UNIVERSELS:
         - 3 actions concrètes valables pour tous les signes
         - Element à privilégier (eau, feu, terre, air)
         - Couleurs ou objets porte-bonheur de la semaine
 
-        CALL-TO-ACTION ENGAGEANT (100 mots):
+        CALL-TO-ACTION ENGAGEANT :
         - Invitation chaleureuse à s'abonner
         - Demande de commentaires spécifique ("Quel signe vous a le plus parlé ?")
         - Encouragement au partage avec une raison émotionnelle

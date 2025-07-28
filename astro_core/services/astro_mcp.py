@@ -224,6 +224,7 @@ class AstroChartImageGenerator:
                 plt.close(fig)
             return None
 
+ 
 # =============================================================================
 # CLASS ASTRO GENERATOR
 # =============================================================================
@@ -240,6 +241,7 @@ class AstroGenerator:
         self.signs_data = self._load_signs_data()
         self.planetary_influences = self._load_planetary_influences()
         self.audio_lang = "fr"
+        
         os.makedirs(self.audio_output_dir, exist_ok=True)
         if MATPLOTLIB_AVAILABLE:
             self.chart_generator = AstroChartImageGenerator(astro_calculator)
@@ -317,6 +319,32 @@ class AstroGenerator:
         if date.month in [6, 7, 8]: planets.append({"name": "Vénus", "state": "direct", "influence": self.planetary_influences["venus"]["direct"]})
         return AstralContext(date=date.strftime("%Y-%m-%d"), day_of_week=date.strftime("%A"), lunar_phase=lunar_phase, season=season, influential_planets=planets[:2], lunar_cycle_day=cycle_day, seasonal_energy=energies.get(season, "équilibre"))
 
+    def _format_astral_context_for_weekly(self, start_date: datetime.date, end_date: datetime.date) -> str:
+        """
+        FONCTION MANQUANTE - Formate le contexte astral pour les templates hebdomadaires
+        Utilise le milieu de semaine comme référence énergétique
+        """
+        # Calculer le milieu de semaine pour le contexte de référence
+        delta = end_date - start_date
+        mid_week_date = start_date + datetime.timedelta(days=delta.days // 2)
+        
+        # Obtenir le contexte du milieu de semaine
+        astral_context = self.get_astral_context(mid_week_date)
+        
+        # Formatter pour injection dans vos templates
+        formatted = f"PÉRIODE: {start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}\n"
+        formatted += f"RÉFÉRENCE ÉNERGÉTIQUE: Milieu de semaine ({mid_week_date.strftime('%d/%m')})\n\n"
+        formatted += f"SAISON: {astral_context.season}\n" 
+        formatted += f"ÉNERGIE SAISONNIÈRE: {astral_context.seasonal_energy}\n"
+        formatted += f"PHASE LUNAIRE: {astral_context.lunar_phase} (Jour {astral_context.lunar_cycle_day}/29)\n"
+        formatted += f"JOUR DE LA SEMAINE: {astral_context.day_of_week}\n"
+        
+        formatted += f"\nPLANÈTES INFLUENTES CETTE SEMAINE:\n"
+        for planet in astral_context.influential_planets:
+            formatted += f"- {planet['name']} ({planet['state']}): {planet['influence']}\n"
+        
+        return formatted
+
     def get_sign_metadata(self, sign: str) -> Optional[SignMetadata]:
         return self.signs_data.get(sign.lower())
 
@@ -340,26 +368,159 @@ class AstroGenerator:
             raise ValueError(f"Format de date invalide '{date_str}'. Utilisez YYYY-MM-DD")
 
     def _clean_script_text(self, text: str) -> str:
-        """Nettoie et améliore le script final"""
-        # Traduire les noms de signes anglais en français
-        translations = {
-            'Aries': 'Bélier', 'Taurus': 'Taureau', 'Gemini': 'Gémeaux',
-            'Leo': 'Lion', 'Virgo': 'Vierge', 'Libra': 'Balance',
-            'Scorpio': 'Scorpion', 'Sagittarius': 'Sagittaire', 
-            'Capricorn': 'Capricorne', 'Aquarius': 'Verseau', 'Pisces': 'Poissons',
-            'conjunction': 'conjonction'
+        """Version améliorée qui corrige TOUS les problèmes de noms"""
+        
+        # 1. Corrections des noms de signes AVANT les autres nettoyages
+        sign_corrections = {
+            # Problèmes spécifiques identifiés
+            'Scorpionn': 'Scorpion',
+            'Scorpionnnn': 'Scorpion', 
+            'Scorpionn': 'Scorpion',
+            'Capricornee': 'Capricorne',
+            'Capricorneee': 'Capricorne',
+            'Capricorneeee': 'Capricorne',
+            
+            # Autres erreurs courantes d'Ollama sur les signes
+            'Beliers': 'Bélier',
+            'Béliers': 'Bélier',
+            'Gemeaux': 'Gémeaux',
+            'Gemeaus': 'Gémeaux',
+            'Cancers': 'Cancer',
+            'Lions': 'Lion',
+            'Vierges': 'Vierge',
+            'Virgos': 'Vierge',
+            'Balances': 'Balance',
+            'Scorpions': 'Scorpion',
+            'Sagittaires': 'Sagittaire',
+            'Capricornes': 'Capricorne',
+            'Verseaux': 'Verseau',
+            'Versaus': 'Verseau',
+            'Poisson': 'Poissons',  # Au singulier par erreur
+            
+            # Erreurs de genre/accord
+            'le Bélier': 'Bélier',
+            'la Bélier': 'Bélier',
+            'le Vierge': 'Vierge',
+            'la Balance': 'Balance',
+            'le Scorpion': 'Scorpion',
+            'la Scorpion': 'Scorpion',
         }
         
-        for en, fr in translations.items():
+        # Appliquer les corrections (insensible à la casse au début)
+        for wrong, correct in sign_corrections.items():
+            # Correction exacte
+            text = text.replace(wrong, correct)
+            # Correction avec variations de casse
+            text = text.replace(wrong.lower(), correct)
+            text = text.replace(wrong.upper(), correct.upper())
+            text = text.replace(wrong.capitalize(), correct)
+        
+        # 2. Corrections linguistiques générales (votre code existant)
+        general_corrections = {
+            'Aries': 'Bélier', 
+            'Taurus': 'Taureau', 
+            'Gemini': 'Gémeaux',
+            'Leo': 'Lion', 
+            'Virgo': 'Vierge', 
+            'Libra': 'Balance',
+            'Scorpio': 'Scorpion', 
+            'Sagittarius': 'Sagittaire', 
+            'Capricorn': 'Capricorne', 
+            'Aquarius': 'Verseau', 
+            'Pisces': 'Poissons',
+            'conjunction': 'conjonction',
+            'anew': 'nouveau',
+            'square': 'carré',
+            'trine': 'trigone',
+            'sextile': 'sextile'
+        }
+        
+        for en, fr in general_corrections.items():
             text = text.replace(en, fr)
         
-        # Nettoyer les doublons d'espaces et caractères étranges
+        # 3. Suppression de textes indésirables
+        unwanted_texts = [
+            '(Continuera avec les autres signes)',
+            '(suite...)',
+            '(à suivre)',
+            '(Continuera...)',
+            '=== Fin du Script Généré ===',
+            'Fin du script',
+            '(100 mots)',
+            '(200 mots)', 
+            '(300 mots)',
+            '(400 mots)',
+            '(500 mots)'
+        ]
+        
+        for unwanted in unwanted_texts:
+            text = text.replace(unwanted, '')
+        
+        # 4. Nettoyage regex (votre code existant)
         import re
-        text = re.sub(r'\n{3,}', '\n\n', text)  # Max 2 retours à la ligne
+        text = re.sub(r'\n{3,}', '\n\n', text)  # Max 2 retours à la ligne  
         text = re.sub(r' {2,}', ' ', text)      # Max 1 espace
+        text = re.sub(r'\([0-9]+ mots\)', '', text)  # Supprimer compteurs
+        
+        # 5. Nettoyage des espaces en fin de correction
         text = text.strip()
         
         return text
+
+
+    def _clean_text_for_tts(self, text: str) -> str:
+        """Nettoie le texte pour la synthèse vocale"""
+        
+        # 1. Supprimer TOUS les emojis
+        # Regex pour détecter les emojis Unicode
+        emoji_pattern = re.compile(
+            "["
+            "\U0001F600-\U0001F64F"  # emoticons
+            "\U0001F300-\U0001F5FF"  # symbols & pictographs
+            "\U0001F680-\U0001F6FF"  # transport & map symbols
+            "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+            "\U00002702-\U000027B0"  # dingbats
+            "\U000024C2-\U0001F251"  # enclosed characters
+            "\U0001F900-\U0001F9FF"  # supplemental symbols
+            "\U0001F018-\U0001F270"  # various symbols
+            "]+", 
+            flags=re.UNICODE
+        )
+        
+        # Supprimer les emojis
+        text = emoji_pattern.sub('', text)
+        
+        # 2. Nettoyer les symboles couramment utilisés en astrologie
+        symbols_to_remove = [
+            '🌟', '✨', '🔮', '🌕', '🌙', '💫', '⭐', '🌞', '🌛', '🌜',
+            '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓',
+            '☉', '☽', '☿', '♀', '♂', '♃', '♄', '♅', '♆', '♇'
+        ]
+        
+        for symbol in symbols_to_remove:
+            text = text.replace(symbol, '')
+
+        pronunciation_fixes = {
+            'AstroGenAI': 'Astro Gen A I',
+            'AI': 'A I',
+            'TTS': 'T T S',
+            'vs': 'versus',
+            '&': 'et',
+            '@': 'arobase',
+            '#': 'hashtag',
+            'Scorpionnnn': 'Scorpion',  # Double sécurité
+            'Capricorneee': 'Capricorne',  # Double sécurité
+        }
+        
+        for wrong, correct in pronunciation_fixes.items():
+            text = text.replace(wrong, correct)
+        
+        # 4. Nettoyage final
+        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r'\n\s*\n', '\n\n', text)
+        text = text.replace('**', '').replace('*', '').replace('_', '')
+        
+        return text.strip()
 
     def calculate_lunar_influence(self, sign: str, date: datetime.date) -> float:
         """Calcule l'influence lunaire sur un signe pour une date donnée."""
@@ -443,11 +604,12 @@ class AstroGenerator:
                     model=self.ollama_model,
                     messages=[{'role': 'user', 'content': prompt}],
                     options={
-                        'temperature': 0.7,
+                        'temperature': 0.6,
                         'top_p': 0.9,
-                        'num_predict': 4000,      
+                        'num_predict': 6000,      
                         'repeat_penalty': 1.1,   
-                        'top_k': 40,             
+                        'top_k': 40,
+                        'stop': ["=== Fin"]             
                     }
                 )
                 return response['message']['content']
@@ -591,81 +753,169 @@ class AstroGenerator:
         logger.info(f"Génération terminée: {success_count}/{len(self.signs_data)} horoscopes créés")
 
         return horoscopes
+    
+    async def generate_single_weekly_sign(self, sign_key: str, events_str: str, period: str):
+        """Génère le conseil hebdomadaire pour un seul signe"""
+        try:
+            # Validation et métadonnées (comme dans votre méthode existante)
+            validated_sign = self._validate_sign(sign_key)
+            sign_data = self.get_sign_metadata(validated_sign)
+            
+            # Template personnalisé pour ce signe
+            template = WeeklyPromptTemplates.get_signs_section_template()
+            prompt = template.format(
+                sign_name=sign_data.name,
+                sign_dates=sign_data.dates,
+                period=period,
+                events=events_str,
+                element=sign_data.element,
+                ruling_planet=sign_data.ruling_planet,
+                traits=', '.join(sign_data.traits)
+            )
+            
+            # Génération optimisée pour contenu court
+            content = await self._call_ollama_for_long_content(prompt)
+            
+            # Validation basique
+            if f"{sign_data.name} :" not in content:
+                logger.warning(f"⚠️ Format incorrect pour {sign_data.name}, correction...")
+                content = f"{sign_data.name} : {content}"
+            
+            logger.info(f"✅ {sign_data.name} généré ({len(content.split())} mots)")
+            return content
+            
+        except Exception as e:
+            logger.error(f"❌ Erreur génération {sign_key}: {e}")
+            # Fallback comme dans votre méthode daily
+            return self._generate_weekly_fallback(sign_key, events_str)
+
+    def _generate_weekly_fallback(self, sign_key: str, events_str: str) -> str:
+        """Fallback pour un signe en cas d'échec (similaire à votre logique)"""
+        sign_data = self.get_sign_metadata(sign_key)
+        
+        fallback = f"""{sign_data.name} : Cette semaine apporte des énergies cosmiques particulières pour votre signe {sign_data.element.lower()}. 
+        Les influences planétaires actuelles résonnent avec votre nature {', '.join(sign_data.traits[:2])}, 
+        vous invitant à rester attentif aux opportunités qui se présentent. 
+        Conseil pratique : privilégiez {sign_data.keywords[0]} cette semaine tout en évitant les décisions impulsives. 
+        Votre planète maîtresse {sign_data.ruling_planet} vous guide vers de nouveaux horizons."""
+        
+        return fallback
+
+    async def generate_all_weekly_signs(self, events_str: str, period: str) -> str:
+        """Génère tous les conseils hebdomadaires en parallèle (comme daily_horoscopes)"""
+        logger.info(f"🔄 Génération des conseils hebdomadaires pour les 12 signes...")
+        
+        # Créer les tâches parallèles (même logique que votre generate_daily_horoscopes)
+        tasks = []
+        for sign_key in self.signs_data.keys():
+            task = self.generate_single_weekly_sign(sign_key, events_str, period)
+            tasks.append((sign_key, task))
+        
+        # Exécution parallèle avec gestion d'erreur (copie de votre logique)
+        results = await asyncio.gather(
+            *[task for _, task in tasks], 
+            return_exceptions=True
+        )
+        
+        # Traitement des résultats
+        weekly_signs_content = []
+        success_count = 0
+        
+        for i, (sign_key, _) in enumerate(tasks):
+            result = results[i]
+            if isinstance(result, Exception):
+                logger.error(f"❌ Erreur {sign_key}: {result}")
+                # Utiliser fallback
+                fallback_content = self._generate_weekly_fallback(sign_key, events_str)
+                weekly_signs_content.append(fallback_content)
+            else:
+                weekly_signs_content.append(result)
+                success_count += 1
+        
+        logger.info(f"✅ Génération terminée: {success_count}/{len(self.signs_data)} signes réussis")
+        
+        # Assembler tous les signes
+        final_content = "\n\n".join(weekly_signs_content)
+        
+        return final_content     
+
+    async def _generate_signs_section_parallel(self, events_str: str, start_date, end_date) -> str:
+        """Version parallèle de votre méthode (comme generate_daily_horoscopes)"""
+        
+        period = f"{start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}"
+        
+        # Utiliser la génération parallèle
+        signs_content = await self.generate_all_weekly_signs(
+            events_str, period
+        )
+        
+        # Nettoyage final (votre méthode existante)
+        signs_content = self._clean_script_text(signs_content)
+        
+        return signs_content
+    
+    async def generate_weekly_summary_by_sections_parallel(self, start_date: datetime.date, end_date: datetime.date):
+        """Version optimisée avec génération parallèle des signes"""
+        logger.info(f"🚀 Génération hebdomadaire PARALLÈLE du {start_date} au {end_date}")
+
+        # 1. Vos calculs d'événements existants
+        weekly_events = self.astro_calculator.get_major_events_for_week(start_date, end_date)
+        events_str = "\n".join([f"- Le {e['date']}: {e['description']} ({e['type']})" for e in weekly_events])
+        
+        sections = []
+        
+        # 2. Introduction (méthode existante)
+        intro_section = await self._generate_intro_section(start_date, end_date, events_str)
+        sections.append(intro_section)
+        
+        # 3. Événements (méthode existante)
+        events_section = await self._generate_events_analysis_section(events_str, weekly_events)
+        sections.append(events_section)
+        
+        # 4. SIGNES EN PARALLÈLE - NOUVELLE MÉTHODE
+        signs_section = await self._generate_signs_section_parallel(events_str, start_date, end_date)
+        sections.append(signs_section)
+        
+        # 5. Conclusion (méthode existante)
+        conclusion_section = await self._generate_conclusion_section(start_date, end_date)
+        sections.append(conclusion_section)
+        
+        # 6. Assemblage final
+        script_text = "\n\n".join(sections)
+        script_text = self._clean_script_text(script_text)
+        
+        # 7. Audio
+        filename = f"hub_weekly_parallel_{start_date.strftime('%Y%m%d')}"
+        audio_path, audio_duration = self.generate_tts_audio(script_text, filename)
+
+        logger.info(f"✅ Résumé hebdomadaire PARALLÈLE généré. Durée: {audio_duration:.2f}s")
+        return script_text, audio_path, audio_duration
 
     async def generate_weekly_summary(self, start_date: datetime.date, end_date: datetime.date) -> Tuple[str, str, float]:
         """
         Génère le script et l'audio pour la vidéo "Hub" hebdomadaire.
         Version par sections pour garantir la longueur.
         """
-        return await self.generate_weekly_summary_by_sections(start_date, end_date)
-
-    async def generate_weekly_summary_by_sections(self, start_date: datetime.date, end_date: datetime.date) -> Tuple[str, str, float]:
-        """
-        Génère le script hebdomadaire par sections pour garantir une longueur substantielle.
-        Retourne (script_text, audio_path, audio_duration).
-        """
-        logger.info(f"Génération du résumé hebdomadaire par sections du {start_date} au {end_date}")
-
-        # 1. Obtenir les données astrologiques
-        weekly_events = self.astro_calculator.get_major_events_for_week(start_date, end_date)
-
-        if not weekly_events:
-            logger.warning("Aucun événement majeur trouvé pour la semaine.")
-            return "Aucun événement majeur cette semaine.", None, 0.0
-
-        events_str = "\n".join([f"- Le {e['date']}: {e['description']} ({e['type']})" for e in weekly_events])
-        
-        # 2. Générer chaque section séparément
-        sections = []
-        
-        # SECTION 1: Introduction (800 mots)
-        intro_section = await self._generate_intro_section(start_date, end_date, events_str)
-        sections.append(intro_section)
-        
-        # SECTION 2: Analyse détaillée des événements (1200 mots)
-        events_section = await self._generate_events_analysis_section(events_str, weekly_events)
-        sections.append(events_section)
-        
-        # SECTION 3: Conseils par signe (1200 mots)
-        signs_section = await self._generate_signs_section(events_str)
-        sections.append(signs_section)
-        
-        # SECTION 4: Rituels et conclusion (400 mots)
-        conclusion_section = await self._generate_conclusion_section(start_date, end_date)
-        sections.append(conclusion_section)
-        
-        # 3. Assembler le script final
-        script_text = "\n\n".join(sections)
-        
-        # 4. Post-processing pour nettoyer
-        script_text = self._clean_script_text(script_text)
-        
-        # 5. Générer l'audio
-        logger.info("Génération du fichier audio TTS pour le script hebdomadaire...")
-        filename = f"hub_weekly_{start_date.strftime('%Y%m%d')}"
-        audio_path, audio_duration = self.generate_tts_audio(script_text, filename)
-
-        logger.info(f"Résumé hebdomadaire par sections généré. Durée audio : {audio_duration:.2f}s")
-        return script_text, audio_path, audio_duration
+        return await self.generate_weekly_summary_by_sections_parallel(start_date, end_date)
 
     async def _generate_intro_section(self, start_date, end_date, events_str) -> str:
         """Génère la section introduction (800 mots)"""
+        astral_context_formatted = self._format_astral_context_for_weekly(start_date, end_date)
         template = WeeklyPromptTemplates.get_intro_section_template()
-        prompt = template.format(
+        enhanced_template = template.replace(
+        "ÉVÉNEMENTS MAJEURS: {events}",
+        "ÉVÉNEMENTS MAJEURS: {events}\n\nCONTEXTE ASTRAL DÉTAILLÉ:\n{astral_context}"
+        )
+        prompt = enhanced_template.format(
             period=f"{start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}",
-            events=events_str
+            events=events_str,
+            astral_context=astral_context_formatted
         )
         return await self._call_ollama_for_long_content(prompt)
 
     async def _generate_events_analysis_section(self, events_str, weekly_events) -> str:
         """Génère l'analyse détaillée des événements (1200 mots)"""
         template = WeeklyPromptTemplates.get_events_analysis_template()
-        prompt = template.format(events=events_str)
-        return await self._call_ollama_for_long_content(prompt)
-
-    async def _generate_signs_section(self, events_str) -> str:
-        """Génère la section conseils par signe (1200 mots)"""
-        template = WeeklyPromptTemplates.get_signs_section_template()
         prompt = template.format(events=events_str)
         return await self._call_ollama_for_long_content(prompt)
 
@@ -713,11 +963,17 @@ class AstroGenerator:
                     # Si erreur de lecture, régénérer
                     logger.warning(f"Fichier audio corrompu, régénération: {output_path}")
                     os.remove(output_path)
-            logger.info("Normalisation du texte pour la synthèse vocale...")
-            normalized_text = ' '.join(text.replace('\n', ' ').split())
-            cleaned_text = normalized_text.replace('**', '').replace('*', '')
-            # Générer le fichier audio
-            tts = gTTS(text=cleaned_text, lang=self.audio_lang, slow=False)
+
+            logger.info("Nettoyage du texte pour la synthèse vocale...")
+            
+            # NOUVEAU: Nettoyer le texte pour TTS
+            cleaned_text = self._clean_text_for_tts(text)
+            normalized_text = ' '.join(cleaned_text.replace('\n', ' ').split())
+            logger.info(f"Texte nettoyé: {len(text)} → {len(normalized_text)} caractères")
+            logger.info(f"Emojis supprimés: {len(text.split()) - len(normalized_text.split())} mots")
+            
+            # Générer le fichier audio avec le texte nettoyé
+            tts = gTTS(text=normalized_text, lang=self.audio_lang, slow=False)
             tts.save(output_path)
             
             # Obtenir la durée
