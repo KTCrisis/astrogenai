@@ -389,6 +389,33 @@ class AstroGenerator:
         
         raise Exception(f"Impossible de générer l'horoscope après {self.max_retries} tentatives: {last_error}")
 
+        
+    async def _call_ollama_for_long_content(self, prompt: str) -> str:
+        if not OLLAMA_AVAILABLE:
+            raise Exception("Ollama non disponible")
+        last_error = None
+        for attempt in range(self.max_retries):
+            try:
+                response = ollama.chat(
+                    model=self.ollama_model,
+                    messages=[{'role': 'user', 'content': prompt}],
+                    options={
+                        'temperature': 0.7,
+                        'top_p': 0.9,
+                        'num_predict': 4000,      
+                        'repeat_penalty': 1.1,   
+                        'top_k': 40,             
+                    }
+                )
+                return response['message']['content']
+                
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Tentative {attempt + 1}/{self.max_retries} échouée: {e}")
+                if attempt < self.max_retries - 1:
+                    await asyncio.sleep(1 * (attempt + 1)) 
+        raise Exception(f"Impossible de générer l'analyse après {self.max_retries} tentatives: {last_error}")
+
     def _create_horoscope_prompt(self, sign, astral_context, astrochart_data=None):
         """Crée le prompt pour générer un horoscope avec données astronomiques précises"""
         sign_data = self.get_sign_metadata(sign)
@@ -451,7 +478,7 @@ class AstroGenerator:
 
         else:
     # =============================================================================
-    # PROMPT STANDARD
+    # PROMPT STANDARD SANS ASTROCHART
     # =============================================================================
             planets_str = ", ".join([f"{p['name']} ({p['state']})" for p in astral_context.influential_planets])
             prompt = f"""Tu es un astrologue expert et bienveillant. Écris un horoscope court et engageant pour le signe {sign_data.name} ({sign_data.dates}).
@@ -482,7 +509,6 @@ class AstroGenerator:
 
     async def generate_single_horoscope(self, sign: str, date: Optional[datetime.date] = None, astrochart_data=None, generate_audio: bool = False):
         try:  
-
             validated_sign = self._validate_sign(sign)
             validated_date = date or datetime.date.today()
             
@@ -592,54 +618,119 @@ class AstroGenerator:
         print(events_str)
 
         prompt = f"""
-        Tu es un astrologue expert et un conteur captivant pour une chaîne YouTube.
-        Ta mission est de créer un script engageant de 8-10 minutes (environ 1300 mots) pour la vidéo "Guide Astrologique de la Semaine".
+        Tu es un astrologue expert et un conteur captivant pour une chaîne YouTube spécialisée dans l'astrologie.
+        Ta mission est de créer un script TRÈS DÉTAILLÉ de 2500-3000 mots MINIMUM pour une vidéo de 10-12 minutes.
 
         CONTEXTE POUR LA SEMAINE DU {start_date.strftime('%d/%m')} AU {end_date.strftime('%d/%m')}:
-        Événements Cosmiques Clés:
+        Événements Cosmiques:
         {events_str}
 
-        INSTRUCTIONS:
+        INSTRUCTIONS STRICTES POUR LA LONGUEUR:
+        - MINIMUM 2500 mots (compte tes mots mentalement)
+        - Chaque section doit contenir AU MOINS 3-4 paragraphes développés
+        - Donne des EXEMPLES CONCRETS et des DÉTAILS PRATIQUES
+        - Développe tes explications, ne sois JAMAIS concis
         - Ta réponse doit être en français uniquement
         - Termine par une phrase complète avec ponctuation
-        - Environ 1300 mots
-        - Ne dis pas les sections (ex : Titre)
+
+        RÈGLES DE FORMATAGE STRICTES:
+        - Numérotez explicitement: 1., 2., 3., 4., etc. (PAS juste "1." partout)
+        - Utilisez des titres clairs pour chaque section
+        - Ne répétez jamais le même numéro
+        - Ne donne pas la date de l'évement comme date au format informatique mais comme un texte: le 28 juillet (pas 2025-07-28)
+
+        EXEMPLE DE FORMATAGE ATTENDU:
+        1. Premier événement: Saturne sextile Uranus le 28 juillet
+        2. Deuxième événement: Saturne conjunction Neptune le 3 aout
+        3. Troisième événement: Saturne sextile Pluton le 2 aout
+        etc.
+
+        RÈGLES LINGUISTIQUES STRICTES:
+        - Utilisez EXCLUSIVEMENT les noms français des signes :
+        * Bélier (JAMAIS Aries)
+        * Taureau (JAMAIS Taurus)  
+        * Gémeaux (JAMAIS Gemini)
+        * Cancer (OK en français)
+        * Lion (JAMAIS Leo)
+        * Vierge (JAMAIS Virgo)
+        * Balance (JAMAIS Libra)
+        * Scorpion (JAMAIS Scorpio)
+        * Sagittaire (JAMAIS Sagittarius)
+        * Capricorne (JAMAIS Capricorn)
+        * Verseau (JAMAIS Aquarius)
+        * Poissons (JAMAIS Pisces)
+        - Si tu écris un nom anglais, c'est une ERREUR GRAVE
         
-      
-    STRUCTURE DU SCRIPT REQUIS :
-        1.  Introduction: Commence par une accroche puissante. Présente l'énergie générale de la semaine en te basant sur l'événement le plus important.
-        2.  Analyse des Événements Majeurs: Plonge en détail dans 2 ou 3 des événements les plus significatifs listés ci-dessus. Explique leur signification et leur impact potentiel de manière claire et accessible.
-        3.  Conseils par Signe: Donne un conseil court (une phrase) et percutant pour chacun des 12 signes. Suis STRICTEMENT la structure et les groupes ci-dessous.
-            - Fais des transitions entre chaque groupe de Signes comme : commencons par les Signes de Feu, enchainons avec les Signes de Terre, passons aux Signes d'air et pour finir les Signes d'air)
-            - Signes de Feu :
-                - Bélier: [ton conseil ici]
-                - Lion: [ton conseil ici]
-                - Sagittaire: [ton conseil ici]
-            - Signes de Terre:
-                - Taureau: [ton conseil ici]
-                - Vierge: [ton conseil ici]
-                - Capricorne: [ton conseil ici]
-            - Signes d'Air:
-                - Gémeaux: [ton conseil ici]
-                - Balance: [ton conseil ici]
-                - Verseau: [ton conseil ici]
-            - Signes d'Eau :
-                - Cancer: [ton conseil ici]
-                - Scorpion: [ton conseil ici]
-                - Poissons: [ton conseil ici]
-        4.Conclusion: Résume l'énergie de la semaine et termine par un appel à l'action positif et engageant comme "Abonnez-vous pour votre guide hebdomadaire et dites-moi en commentaire quel événement vous inspire le plus cette semaine !".
+        STRUCTURE OBLIGATOIRE À RESPECTER (développe CHAQUE section):
+
+        1. INTRODUCTION DÉVELOPPÉE (400-500 mots):
+        - Accueil chaleureux et personnalisé
+        - Présentation détaillée de l'énergie générale de la semaine
+        - Explication approfondie de l'événement cosmique le plus important
+        - Contexte historique ou symbolique de cet événement
+        - Annonce détaillée de ce qui va être couvert dans la vidéo
+
+        2. ANALYSE DÉTAILLÉE DES ÉVÉNEMENTS MAJEURS (800-1000 mots):
+        Pour CHAQUE événement important:
+        - Explication technique de ce qui se passe astronomiquement
+        - Signification astrologique profonde
+        - Impact concret sur notre vie quotidienne
+        - Exemples pratiques de comment cela peut se manifester
+        - Conseils spécifiques pour naviguer cette énergie
+        - Références mythologiques ou historiques si pertinentes
+
+        3. CONSEILS DÉTAILLÉS PAR SIGNE (1000-1200 mots):
+        Pour CHAQUE signe (pas par élément), donne:
+        - Un conseil principal développé sur 2-3 phrases
+        - Un exemple concret de situation
+        - Une action pratique à entreprendre
+        - Ce qu'il faut éviter cette semaine
         
-        TON:
-        - Inspirant, bienveillant et moderne.
-        - Évite le jargon trop technique.
-        - Sois un guide, pas un devin.
-        - Adapte le contenu au 
-        - N'utilise pas le mot Astrologue pour te définir mais AstroGenAI
+        SIGNES À TRAITER INDIVIDUELLEMENT:
+        - Bélier: [développe sur 80-100 mots]
+        - Taureau: [développe sur 80-100 mots]  
+        - Gémeaux: [développe sur 80-100 mots]
+        - Cancer: [développe sur 80-100 mots]
+        - Lion: [développe sur 80-100 mots]
+        - Vierge: [développe sur 80-100 mots]
+        - Balance: [développe sur 80-100 mots]
+        - Scorpion: [développe sur 80-100 mots]
+        - Sagittaire: [développe sur 80-100 mots]
+        - Capricorne: [développe sur 80-100 mots]
+        - Verseau: [développe sur 80-100 mots]
+        - Poissons: [développe sur 80-100 mots]
+
+        4. RITUELS ET PRATIQUES DE LA SEMAINE (200-300 mots):
+        - Rituel de Nouvelle Lune ou Pleine Lune détaillé
+        - Méditation ou affirmation spécifique
+        - Pierres ou cristaux recommandés avec explications
+        - Pratiques quotidiennes suggérées
+
+        5. CONCLUSION ENGAGEANTE (200-300 mots):
+        - Résumé des points clés avec de nouveaux détails
+        - Message d'encouragement personnalisé
+        - Call-to-action détaillé pour l'engagement
+        - Invitation à partager leurs expériences
+        - Annonce du contenu de la semaine prochaine
+
+        STYLE ET TON OBLIGATOIRES:
+        - Sois TRÈS expressif et descriptif
+        - Utilise des métaphores et des images poétiques
+        - Raconte des "histoires" autour des énergies planétaires
+        - Sois bienveillant mais aussi mystérieux et captivant
+        - Ajoute des détails sur les sensations, les émotions
+        - N'utilise pas le mot Astrologue pour te définir mais "AstroGenAI"
+        - Parle directement aux spectateurs ("vous", "votre")
+
+        RAPPEL CRITIQUE: 
+        Ce script doit faire MINIMUM 2500 mots. Si tu sens que tu es en train d'être trop concis, DÉVELOPPE davantage chaque point. Ajoute des exemples, des anecdotes, des explications supplémentaires. La vidéo finale doit durer 10-12 minutes.
+
+        Commence maintenant et développe chaque section en profondeur:
         """
 
         # 3. Appeler Ollama pour générer le script
         logger.info("Génération du script hebdomadaire avec Ollama...")
-        script_text = await self._call_ollama_with_retry(prompt)
+        script_text = await self._call_ollama_for_long_content(prompt)
 
         # 4. Générer le fichier audio long
         logger.info("Génération du fichier audio TTS pour le script hebdomadaire...")
@@ -681,7 +772,7 @@ class AstroGenerator:
             return "Votre Horoscope par AI"
 
     def generate_tts_audio(self, text: str, filename: str) -> Tuple[Optional[str], float]:
-        """Génère un fichier audio à partir du texte - Version améliorée."""
+        """Génère un fichier audio à partir du texte"""
         if not TTS_AVAILABLE:
             logger.warning("TTS non disponible")
             return None, 0.0
@@ -849,7 +940,6 @@ if FASTMCP_AVAILABLE:
 def generate_chart_image_tool(date: Optional[str] = None) -> dict:
     """
     Génère une image de carte astrologique pour une date donnée.
-    Intégration directe - plus de proxy vers astro_chart_mcp
     """
     try:
         if not ASTROCHART_AVAILABLE:

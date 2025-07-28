@@ -3,6 +3,7 @@ import datetime
 import sys
 import os
 
+#launch with python -m scripts.weekly_hub
 def setup_imports():
     """Configure les chemins d'import et importe les modules"""
     print("🔧 Configuration des imports...")
