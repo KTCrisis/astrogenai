@@ -1802,7 +1802,7 @@ async def api_intelligent_batch_complete_generation():
 def print_startup_banner():
     """Affiche la bannière de démarrage"""
     print("=" * 70)
-    print("🌟 DÉMARRAGE ASTRO GENERATOR MCP v2.1 - AVEC MONTAGE VIDÉO")
+    print("🌟 DÉMARRAGE ASTRO GENERATOR MCP v2.2")
     print("=" * 70)
     print(f"🌐 Interface web: http://127.0.0.1:{settings.PORT}/")
     print(f"🔐 Authentification: {'Activée' if settings.AUTH_ENABLED else 'Désactivée'}")

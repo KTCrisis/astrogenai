@@ -35,9 +35,10 @@ except ImportError:
 try:
     from .prompts import PromptManager, HoroscopePromptTemplates, WeeklyPromptTemplates
     PROMPTS_AVAILABLE = True
-except ImportError:
+    print("✅ Prompts modulaires initialisés")
+except ImportError as e:
     PROMPTS_AVAILABLE = False
-    logger.warning("Prompts modulaires non disponibles")
+    print(f"⚠️ Prompts modulaires non disponibles: {e}")
 
 try:
     astrochart_path = os.path.join(os.path.dirname(__file__), 'astrochart')
@@ -58,7 +59,7 @@ try:
 except ImportError:
     TTS_AVAILABLE = False
     print("⚠️  TTS non disponible (gTTS, mutagen)")
-    
+
 try:
     import matplotlib.pyplot as plt
     import numpy as np
@@ -246,6 +247,16 @@ class AstroGenerator:
             self.chart_generator = None
         if ASTROCHART_AVAILABLE:
             self.astro_calculator = astro_calculator
+        if PROMPTS_AVAILABLE:
+            self.prompt_manager = PromptManager()
+            self.horoscope_prompts = HoroscopePromptTemplates()
+            self.weekly_prompts = WeeklyPromptTemplates()
+            logger.info("✅ Prompts modulaires initialisés")
+        else:
+            self.prompt_manager = None
+            self.horoscope_prompts = None
+            self.weekly_prompts = None
+            logger.warning("⚠️ Utilisation des prompts legacy")
 
     def _load_signs_data(self) -> Dict[str, SignMetadata]:
         signs_raw = {
