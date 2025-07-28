@@ -99,11 +99,11 @@ class WeeklyPromptTemplates:
         
         return f"""{base.get_astrologer_persona()}
 
-        MISSION: Écris le conseil hebdomadaire détaillé pour le signe {{sign_name}} uniquement.
+        MISSION: Écris le conseil hebdomadaire détaillé pour le signe {{sign_name}} uniquement environ 200 à 300 mots.
 
         CONTEXTE ÉNERGÉTIQUE: {{events}}
 
-        {base.get_length_requirements(1000)}
+        {base.get_length_requirements(200)}
         {base.get_french_language_rules()}
         {base.get_astrological_language_rules()}
         {base.get_youtube_tone()}
@@ -122,7 +122,6 @@ class WeeklyPromptTemplates:
         Format: "{{sign_name}} : [contenu]"
         PAS de mention d'autres signes
         Contenu substantiel et personnalisé
-    
 
         CONTENU REQUIS:
         Énergie principale de la semaine pour ce signe

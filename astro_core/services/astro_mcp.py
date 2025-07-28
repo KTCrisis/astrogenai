@@ -508,8 +508,8 @@ class AstroGenerator:
             '&': 'et',
             '@': 'arobase',
             '#': 'hashtag',
-            'Scorpionnnn': 'Scorpion',  # Double sécurité
-            'Capricorneee': 'Capricorne',  # Double sécurité
+            'Scorpionnnn': 'Scorpion',  
+            'Capricorneee': 'Capricorne',  
         }
         
         for wrong, correct in pronunciation_fixes.items():
@@ -774,7 +774,7 @@ class AstroGenerator:
             )
             
             # Génération optimisée pour contenu court
-            content = await self._call_ollama_for_long_content(prompt)
+            content = await self._call_ollama_with_retry(prompt)
             
             # Validation basique
             if f"{sign_data.name} :" not in content:

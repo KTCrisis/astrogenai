@@ -61,5 +61,5 @@ class PromptManager:
             "base_templates": True,
             "horoscope_templates": True,
             "weekly_templates": True,
-            "total_templates": 7  # Nombre total de templates disponibles
+            "title_templates": True
         }
