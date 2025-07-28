@@ -5,6 +5,7 @@ Gestionnaire centralisé de tous les prompts AstroGenAI
 from .base_templates import BasePromptTemplates
 from .horoscope_templates import HoroscopePromptTemplates  
 from .weekly_templates import WeeklyPromptTemplates
+from .title_templates import TitlePromptTemplates
 
 class PromptManager:
     """Gestionnaire centralisé de tous les prompts"""
@@ -13,6 +14,7 @@ class PromptManager:
         self.base = BasePromptTemplates()
         self.horoscope = HoroscopePromptTemplates()
         self.weekly = WeeklyPromptTemplates()
+        self.title = TitlePromptTemplates()
     
     def get_horoscope_prompt(self, prompt_type: str, **kwargs):
         """Retourne un prompt d'horoscope formaté"""
@@ -41,7 +43,18 @@ class PromptManager:
             raise ValueError(f"Section inconnue: {section}")
         
         return template.format(**kwargs)
-    
+
+    def get_titlle_prompt(self, prompt_type: str, **kwargs):
+        """Retourne un prompt d'horoscope formaté"""
+        if prompt_type == "individual":
+            template = self.title.get_individual_title_template()
+        elif prompt_type == "weekly":
+            template = self.title.get_weekly_title_template()
+        else:
+            raise ValueError(f"Type de prompt inconnu: {prompt_type}")
+        
+        return template.format(**kwargs)
+        
     def get_system_status(self):
         """Retourne l'état du système de prompts"""
         return {

@@ -33,7 +33,7 @@ except ImportError:
     print("⚠️  FastMCP non disponible")
 
 try:
-    from .prompts import PromptManager, HoroscopePromptTemplates, WeeklyPromptTemplates
+    from .prompts import PromptManager, HoroscopePromptTemplates, WeeklyPromptTemplates, TitlePromptTemplates
     PROMPTS_AVAILABLE = True
     print("✅ Prompts modulaires initialisés")
 except ImportError as e:
@@ -251,12 +251,18 @@ class AstroGenerator:
             self.prompt_manager = PromptManager()
             self.horoscope_prompts = HoroscopePromptTemplates()
             self.weekly_prompts = WeeklyPromptTemplates()
+            self.title_prompts = TitlePromptTemplates()
             logger.info("✅ Prompts modulaires initialisés")
         else:
             self.prompt_manager = None
             self.horoscope_prompts = None
             self.weekly_prompts = None
+            self.title_prompts = None
             logger.warning("⚠️ Utilisation des prompts legacy")
+
+    # =============================================================================
+    # MÉTHODES UTILITAIRES 
+    # =============================================================================
 
     def _load_signs_data(self) -> Dict[str, SignMetadata]:
         signs_raw = {
@@ -314,10 +320,6 @@ class AstroGenerator:
     def get_sign_metadata(self, sign: str) -> Optional[SignMetadata]:
         return self.signs_data.get(sign.lower())
 
-    # =============================================================================
-    # MÉTHODES DE VALIDATION
-    # =============================================================================
-
     def _validate_sign(self, sign: str) -> str:
         """Valide et normalise un signe astrologique."""
         if not sign:
@@ -337,9 +339,27 @@ class AstroGenerator:
         except ValueError:
             raise ValueError(f"Format de date invalide '{date_str}'. Utilisez YYYY-MM-DD")
 
-    # =============================================================================
-    # MÉTHODES UTILITAIRES 
-    # =============================================================================
+    def _clean_script_text(self, text: str) -> str:
+        """Nettoie et améliore le script final"""
+        # Traduire les noms de signes anglais en français
+        translations = {
+            'Aries': 'Bélier', 'Taurus': 'Taureau', 'Gemini': 'Gémeaux',
+            'Leo': 'Lion', 'Virgo': 'Vierge', 'Libra': 'Balance',
+            'Scorpio': 'Scorpion', 'Sagittarius': 'Sagittaire', 
+            'Capricorn': 'Capricorne', 'Aquarius': 'Verseau', 'Pisces': 'Poissons',
+            'conjunction': 'conjonction'
+        }
+        
+        for en, fr in translations.items():
+            text = text.replace(en, fr)
+        
+        # Nettoyer les doublons d'espaces et caractères étranges
+        import re
+        text = re.sub(r'\n{3,}', '\n\n', text)  # Max 2 retours à la ligne
+        text = re.sub(r' {2,}', ' ', text)      # Max 1 espace
+        text = text.strip()
+        
+        return text
 
     def calculate_lunar_influence(self, sign: str, date: datetime.date) -> float:
         """Calcule l'influence lunaire sur un signe pour une date donnée."""
@@ -439,96 +459,48 @@ class AstroGenerator:
                     await asyncio.sleep(1 * (attempt + 1)) 
         raise Exception(f"Impossible de générer l'analyse après {self.max_retries} tentatives: {last_error}")
 
+    # =============================================================================
+    # PROMPT SINGLE
+    # =============================================================================
+
     def _create_horoscope_prompt(self, sign, astral_context, astrochart_data=None):
-        """Crée le prompt pour générer un horoscope avec données astronomiques précises"""
+        """Version modulaire du prompt d'horoscope"""
         sign_data = self.get_sign_metadata(sign)
-    # =============================================================================
-    # PROMPT ASTROCHART
-    # =============================================================================
-        if astrochart_data:
-            # UTILISER LES VRAIES DONNÉES ASTRONOMIQUES
-            chart_data = astrochart_data["chart_data"]
-            positions = astrochart_data["positions"] 
-            aspects = astrochart_data["aspects"]
-            
-            # 1. CONSTRUIRE LA LISTE DES POSITIONS PLANÉTAIRES
-            positions_text = "POSITIONS PLANÉTAIRES EXACTES:\n"
-            for planet in positions:
-                positions_text += f"- {planet.name} ({planet.symbol}): {planet.degree_in_sign:.1f}° en {planet.sign_name}"
-                if planet.retrograde:
-                    positions_text += " (Rétrograde)"
-                positions_text += f" (longitude: {planet.longitude:.1f}°)\n"
-            
-            # 2. CONSTRUIRE LA LISTE DES ASPECTS MAJEURS
-            aspects_text = "ASPECTS PLANÉTAIRES ACTIFS:\n"
-            if aspects:
-                for aspect in aspects[:5]:  # Limiter aux 5 plus importants
-                    exactness = "EXACT" if aspect.exact else f"orbe {aspect.orb:.1f}°"
-                    aspects_text += f"- {aspect.planet1} {aspect.aspect_type.upper()} {aspect.planet2} ({exactness})\n"
-            else:
-                aspects_text += "- Aucun aspect majeur aujourd'hui\n"
-            
-            # 3. INFORMATIONS LUNAIRES PRÉCISES
-            lunar_info = f"PHASE LUNAIRE: {chart_data.moon_phase}"
-            
-            # 4. PROMPT ENRICHI AVEC VRAIES DONNÉES
-            prompt = f"""Tu es un astrologue expert et bienveillant s'appuyant sur les données astronomiques.
+        template = self.horoscope_prompts.get_enriched_horoscope_template()
 
-    DONNÉES ASTRONOMIQUES RÉELLES pour le {chart_data.date}:
-
-    {positions_text}
-    {aspects_text}
-    {lunar_info}
-
-    SIGNE À ANALYSER: {sign_data.name} ({sign_data.dates})
-    Élément: {sign_data.element} | Planète maîtresse: {sign_data.ruling_planet}
-    Traits: {', '.join(sign_data.traits)}
-
-    INSTRUCTIONS:
-    - Crée un horoscope de {self.horoscope_min_words}-{self.horoscope_max_words} mots
-    - UTILISE les positions et aspects RÉELS ci-dessus (pas des généralités)
-    - N'INDIQUE pas les orbes et degrés comme par exemple : Trine (30°) ou Sextile (60°) ou EXACT quand tu réponds, donne juste Trine, Sextile
-    - Mentionne 1 seul aspect le plus significatif s'ils concernent le signe
-    - Adapte selon la phase lunaire actuelle
-    - Ta réponse doit être en français uniquement
-    - Termine par une phrase complète avec ponctuation
-    - Ton moderne, bienveillant, précis et motivant
-    - Donne 1 conseil pratique adapté au signe.
-    - N'utilise pas le mot Astrologue pour te définir mais "AstroGenAI"
-    - Commence par "Cher {sign_data.name},"
-
-    Réponds UNIQUEMENT avec le texte de l'horoscope."""
-
+        chart_data = astrochart_data["chart_data"]
+        positions = astrochart_data["positions"] 
+        aspects = astrochart_data["aspects"]
+        
+        positions_text = "POSITIONS PLANÉTAIRES EXACTES:\n"
+        for planet in positions:
+            positions_text += f"- {planet.name} ({planet.symbol}): {planet.degree_in_sign:.1f}° en {planet.sign_name}"
+            if planet.retrograde:
+                positions_text += " (Rétrograde)"
+            positions_text += f" (longitude: {planet.longitude:.1f}°)\n"
+        
+        aspects_text = "ASPECTS PLANÉTAIRES ACTIFS:\n"
+        if aspects:
+            for aspect in aspects[:5]:
+                exactness = "EXACT" if aspect.exact else f"orbe {aspect.orb:.1f}°"
+                aspects_text += f"- {aspect.planet1} {aspect.aspect_type.upper()} {aspect.planet2} ({exactness})\n"
         else:
-    # =============================================================================
-    # PROMPT STANDARD SANS ASTROCHART
-    # =============================================================================
-            planets_str = ", ".join([f"{p['name']} ({p['state']})" for p in astral_context.influential_planets])
-            prompt = f"""Tu es un astrologue expert et bienveillant. Écris un horoscope court et engageant pour le signe {sign_data.name} ({sign_data.dates}).
-
-    CONTEXTE ASTROLOGIQUE:
-    - Date: {astral_context.date} ({astral_context.day_of_week})
-    - Saison: {astral_context.season} - {astral_context.seasonal_energy}
-    - Phase lunaire: {astral_context.lunar_phase}
-    - Planètes influentes: {planets_str}
-
-    CARACTÉRISTIQUES DU SIGNE:
-    - Élément: {sign_data.element}
-    - Planète maîtresse: {sign_data.ruling_planet}
-    - Traits principaux: {', '.join(sign_data.traits)}
-
-    INSTRUCTIONS:
-    - Horoscope de {self.horoscope_min_words}-{self.horoscope_max_words} mots maximum.
-    - Ta réponse doit être en français uniquement
-    - Termine par une phrase complète avec ponctuation
-    - Ton moderne, bienveillant et motivant.
-    - Donne 1 conseil pratique adapté au signe.
-    - Commence par "Cher {sign_data.name},"
-    - Adapte le contenu au contexte astral fourni.
-    - N'utilise pas le mot Astrologue pour te définir mais AstroGenAI
-
-    Réponds UNIQUEMENT avec le texte de l'horoscope."""
-        return prompt
+            aspects_text += "- Aucun aspect majeur aujourd'hui\n"
+        
+        lunar_info = f"PHASE LUNAIRE: {chart_data.moon_phase}"
+        return template.format(
+            date=chart_data.date,
+            positions_text=positions_text,
+            aspects_text=aspects_text,
+            lunar_info=lunar_info,
+            sign_name=sign_data.name,
+            sign_dates=sign_data.dates,
+            element=sign_data.element,
+            ruling_planet=sign_data.ruling_planet,
+            traits=', '.join(sign_data.traits),
+            min_words=self.horoscope_min_words,
+            max_words=self.horoscope_max_words
+        )
 
     async def generate_single_horoscope(self, sign: str, date: Optional[datetime.date] = None, astrochart_data=None, generate_audio: bool = False):
         try:  
@@ -557,7 +529,6 @@ class AstroGenerator:
             
             horoscope_text = await self._call_ollama_with_retry(prompt)
             title_theme = await self._extract_title_theme(horoscope_text)
-            # Calculer l'influence lunaire
             lunar_influence = self.calculate_lunar_influence(validated_sign, validated_date)
             
             result = HoroscopeResult(
@@ -590,7 +561,7 @@ class AstroGenerator:
             raise     
 
     async def generate_daily_horoscopes(self, date: Optional[datetime.date] = None) -> Dict[str, HoroscopeResult]:
-        """Génère tous les horoscopes du jour en parallèle - Version optimisée."""
+        """Génère tous les horoscopes du jour en parallèle"""
         validated_date = date or datetime.date.today()
         logger.info(f"Génération des horoscopes pour {validated_date}")
 
@@ -628,148 +599,6 @@ class AstroGenerator:
         """
         return await self.generate_weekly_summary_by_sections(start_date, end_date)
 
-    # async def generate_weekly_summary(self, start_date: datetime.date, end_date: datetime.date) -> Tuple[str, str, float]:
-    #     """
-    #     Génère le script et l'audio pour la vidéo "Hub" hebdomadaire.
-    #     Retourne (script_text, audio_path, audio_duration).
-    #     """
-    #     logger.info(f"Génération du résumé hebdomadaire du {start_date} au {end_date}")
-
-    #     # 1. Obtenir les données astrologiques de la semaine
-    #     # Assurez-vous que astro_calculator est accessible via self.
-    #     weekly_events = self.astro_calculator.get_major_events_for_week(start_date, end_date)
-
-    #     if not weekly_events:
-    #         logger.warning("Aucun événement majeur trouvé pour la semaine.")
-    #         return "Aucun événement majeur cette semaine.", None, 0.0
-
-    #     # 2. Construire le prompt pour Ollama
-    #     events_str = "\n".join([f"- Le {e['date']}: {e['description']} ({e['type']})" for e in weekly_events])
-    #     print(events_str)
-
-        # prompt = f"""
-        # Tu es un astrologue expert et un conteur captivant pour une chaîne YouTube spécialisée dans l'astrologie.
-        # Ta mission est de créer un script TRÈS DÉTAILLÉ de 2500-3000 mots MINIMUM pour une vidéo de 10-12 minutes.
-
-        # CONTEXTE POUR LA SEMAINE DU {start_date.strftime('%d/%m')} AU {end_date.strftime('%d/%m')}:
-        # Événements Cosmiques:
-        # {events_str}
-
-        # INSTRUCTIONS STRICTES POUR LA LONGUEUR:
-        # - MINIMUM 2500 mots (compte tes mots mentalement)
-        # - Chaque section doit contenir AU MOINS 3-4 paragraphes développés
-        # - Donne des EXEMPLES CONCRETS et des DÉTAILS PRATIQUES
-        # - Développe tes explications, ne sois JAMAIS concis
-        # - Ta réponse doit être en français uniquement
-        # - Termine par une phrase complète avec ponctuation
-
-        # RÈGLES DE FORMATAGE STRICTES:
-        # - Numérotez explicitement: 1., 2., 3., 4., etc. (PAS juste "1." partout)
-        # - Utilisez des titres clairs pour chaque section
-        # - Ne répétez jamais le même numéro
-        # - Ne donne pas la date de l'évement comme date au format informatique mais comme un texte: le 28 juillet (pas 2025-07-28)
-
-        # EXEMPLE DE FORMATAGE ATTENDU:
-        # 1. Premier événement: Saturne sextile Uranus le 28 juillet
-        # 2. Deuxième événement: Saturne conjunction Neptune le 3 aout
-        # 3. Troisième événement: Saturne sextile Pluton le 2 aout
-        # etc.
-
-        # RÈGLES LINGUISTIQUES STRICTES:
-        # - Utilisez EXCLUSIVEMENT les noms français des signes :
-        # * Bélier (JAMAIS Aries)
-        # * Taureau (JAMAIS Taurus)  
-        # * Gémeaux (JAMAIS Gemini)
-        # * Cancer (OK en français)
-        # * Lion (JAMAIS Leo)
-        # * Vierge (JAMAIS Virgo)
-        # * Balance (JAMAIS Libra)
-        # * Scorpion (JAMAIS Scorpio)
-        # * Sagittaire (JAMAIS Sagittarius)
-        # * Capricorne (JAMAIS Capricorn)
-        # * Verseau (JAMAIS Aquarius)
-        # * Poissons (JAMAIS Pisces)
-        # - Si tu écris un nom anglais, c'est une ERREUR GRAVE
-
-        # STRUCTURE OBLIGATOIRE À RESPECTER (développe CHAQUE section):
-
-        # 1. INTRODUCTION DÉVELOPPÉE (400-500 mots):
-        # - Accueil chaleureux et personnalisé
-        # - Présentation détaillée de l'énergie générale de la semaine
-        # - Explication approfondie de l'événement cosmique le plus important
-        # - Contexte historique ou symbolique de cet événement
-        # - Annonce détaillée de ce qui va être couvert dans la vidéo
-
-        # 2. ANALYSE DÉTAILLÉE DES ÉVÉNEMENTS MAJEURS (800-1000 mots):
-        # Pour CHAQUE événement important:
-        # - Explication technique de ce qui se passe astronomiquement
-        # - Signification astrologique profonde
-        # - Impact concret sur notre vie quotidienne
-        # - Exemples pratiques de comment cela peut se manifester
-        # - Conseils spécifiques pour naviguer cette énergie
-        # - Références mythologiques ou historiques si pertinentes
-
-        # 3. CONSEILS DÉTAILLÉS PAR SIGNE (1000-1200 mots):
-        # Pour CHAQUE signe (pas par élément), donne:
-        # - Un conseil principal développé sur 2-3 phrases
-        # - Un exemple concret de situation
-        # - Une action pratique à entreprendre
-        # - Ce qu'il faut éviter cette semaine
-        
-        # SIGNES À TRAITER INDIVIDUELLEMENT:
-        # - Bélier: [développe sur 80-100 mots]
-        # - Taureau: [développe sur 80-100 mots]  
-        # - Gémeaux: [développe sur 80-100 mots]
-        # - Cancer: [développe sur 80-100 mots]
-        # - Lion: [développe sur 80-100 mots]
-        # - Vierge: [développe sur 80-100 mots]
-        # - Balance: [développe sur 80-100 mots]
-        # - Scorpion: [développe sur 80-100 mots]
-        # - Sagittaire: [développe sur 80-100 mots]
-        # - Capricorne: [développe sur 80-100 mots]
-        # - Verseau: [développe sur 80-100 mots]
-        # - Poissons: [développe sur 80-100 mots]
-
-        # 4. RITUELS ET PRATIQUES DE LA SEMAINE (200-300 mots):
-        # - Rituel de Nouvelle Lune ou Pleine Lune détaillé
-        # - Méditation ou affirmation spécifique
-        # - Pierres ou cristaux recommandés avec explications
-        # - Pratiques quotidiennes suggérées
-
-        # 5. CONCLUSION ENGAGEANTE (200-300 mots):
-        # - Résumé des points clés avec de nouveaux détails
-        # - Message d'encouragement personnalisé
-        # - Call-to-action détaillé pour l'engagement
-        # - Invitation à partager leurs expériences
-        # - Annonce du contenu de la semaine prochaine
-
-        # STYLE ET TON OBLIGATOIRES:
-        # - Sois TRÈS expressif et descriptif
-        # - Utilise des métaphores et des images poétiques
-        # - Raconte des "histoires" autour des énergies planétaires
-        # - Sois bienveillant mais aussi mystérieux et captivant
-        # - Ajoute des détails sur les sensations, les émotions
-        # - N'utilise pas le mot Astrologue pour te définir mais "AstroGenAI"
-        # - Parle directement aux spectateurs ("vous", "votre")
-
-        # RAPPEL CRITIQUE: 
-        # Ce script doit faire MINIMUM 2500 mots. Si tu sens que tu es en train d'être trop concis, DÉVELOPPE davantage chaque point. Ajoute des exemples, des anecdotes, des explications supplémentaires. La vidéo finale doit durer 10-12 minutes.
-
-        # Commence maintenant et développe chaque section en profondeur:
-        # """
-
-        # # 3. Appeler Ollama pour générer le script
-        # logger.info("Génération du script hebdomadaire avec Ollama...")
-        # script_text = await self._call_ollama_for_long_content(prompt)
-
-        # # 4. Générer le fichier audio long
-        # logger.info("Génération du fichier audio TTS pour le script hebdomadaire...")
-        # filename = f"hub_weekly_{start_date.strftime('%Y%m%d')}"
-        # audio_path, audio_duration = self.generate_tts_audio(script_text, filename)
-
-        # logger.info(f"Résumé hebdomadaire généré. Durée audio : {audio_duration:.2f}s")
-        # return script_text, audio_path, audio_duration
-        
     async def generate_weekly_summary_by_sections(self, start_date: datetime.date, end_date: datetime.date) -> Tuple[str, str, float]:
         """
         Génère le script hebdomadaire par sections pour garantir une longueur substantielle.
@@ -821,169 +650,42 @@ class AstroGenerator:
 
     async def _generate_intro_section(self, start_date, end_date, events_str) -> str:
         """Génère la section introduction (800 mots)"""
-        prompt = f"""Tu es un astrologue expert pour YouTube. Écris UNIQUEMENT une introduction détaillée de 800 mots minimum pour une vidéo astrologique hebdomadaire.
-
-    PÉRIODE: Du {start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}
-    ÉVÉNEMENTS: {events_str}
-
-    INSTRUCTIONS STRICTES:
-    - EXACTEMENT 800 mots minimum
-    - Style chaleureux et engageant pour YouTube
-    - Présentation de l'énergie générale de la semaine
-    - Mise en avant de l'événement le plus important
-    - Contexte historique/symbolique
-    - Annonce de ce qui sera couvert dans la vidéo
-    - FRANÇAIS UNIQUEMENT - noms de signes en français (Bélier, Lion, etc.)
-    - NE PAS METTRE D'EMOJI
-    - N'utilise pas le mot Astrologue pour te définir mais "AstroGenAI"
-    - Parle directement aux spectateurs ("vous", "votre")
-    - Commence par "Bienvenue dans votre Guide Astrologique hebdomadaire par AstroGenAI!"
-
-    Écris maintenant cette introduction substantielle:"""
-
+        template = WeeklyPromptTemplates.get_intro_section_template()
+        prompt = template.format(
+            period=f"{start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}",
+            events=events_str
+        )
         return await self._call_ollama_for_long_content(prompt)
 
     async def _generate_events_analysis_section(self, events_str, weekly_events) -> str:
         """Génère l'analyse détaillée des événements (1200 mots)"""
-        prompt = f"""Tu es un astrologue expert. Écris UNIQUEMENT une analyse détaillée de 1200 mots minimum des événements astrologiques de la semaine.
-
-    ÉVÉNEMENTS À ANALYSER:
-    {events_str}
-
-    INSTRUCTIONS STRICTES:
-    - EXACTEMENT 1200 mots minimum
-    - Analyse CHAQUE événement majeur individuellement
-    - Pour chaque événement, explique:
-    * Ce qui se passe astronomiquement
-    * La signification astrologique
-    * L'impact concret sur la vie quotidienne
-    * Des exemples pratiques de manifestation
-    * Des conseils pour naviguer cette énergie
-    - FRANÇAIS UNIQUEMENT
-    - NE PAS METTRE D'EMOJI
-    - N'utilise pas le mot Astrologue pour te définir mais "AstroGenAI"
-    - Parle directement aux spectateurs ("vous", "votre")
-    - Structure: "1. Premier événement", "2. Deuxième événement", etc.
-    - Développe chaque événement sur 150-200 mots minimum
-
-    Commence l'analyse maintenant:"""
-
+        template = WeeklyPromptTemplates.get_events_analysis_template()
+        prompt = template.format(events=events_str)
         return await self._call_ollama_for_long_content(prompt)
 
     async def _generate_signs_section(self, events_str) -> str:
         """Génère la section conseils par signe (1200 mots)"""
-        prompt = f"""Tu es un astrologue expert. Écris UNIQUEMENT les conseils détaillés par signe pour cette semaine astrologique de 1200 mots minimum.
-
-    CONTEXTE ÉNERGÉTIQUE: {events_str}
-
-    INSTRUCTIONS STRICTES:
-    - EXACTEMENT 1200 mots minimum (100 mots par signe)
-    - Conseils pour LES 12 SIGNES individuellement
-    - Pour chaque signe, donne:
-    * Un conseil principal développé (3-4 phrases)
-    * Un exemple concret de situation
-    * Une action pratique à entreprendre
-    * Ce qu'il faut éviter cette semaine
-    - NOMS FRANÇAIS OBLIGATOIRES: Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons
-    - Format: "Bélier : ...", "Taureau : ...", etc.
-    - FRANÇAIS UNIQUEMENT - noms de signes en français (Bélier, Lion, etc.)
-    - NE PAS METTRE D'EMOJI
-    - N'utilise pas le mot Astrologue pour te définir mais "AstroGenAI"
-    - Parle directement aux spectateurs ("vous", "votre")
-
-    SIGNES À TRAITER (100 mots chacun):
-    1. Bélier
-    2. Taureau  
-    3. Gémeaux
-    4. Cancer
-    5. Lion
-    6. Vierge
-    7. Balance
-    8. Scorpion
-    9. Sagittaire
-    10. Capricorne
-    11. Verseau
-    12. Poissons
-
-    Commence les conseils maintenant:"""
-
+        template = WeeklyPromptTemplates.get_signs_section_template()
+        prompt = template.format(events=events_str)
         return await self._call_ollama_for_long_content(prompt)
 
     async def _generate_conclusion_section(self, start_date, end_date) -> str:
         """Génère la section rituels et conclusion (400 mots)"""
-        prompt = f"""Tu es un astrologue expert. Écris UNIQUEMENT une conclusion avec rituels de 400 mots minimum pour une vidéo YouTube hebdomadaire.
-
-    PÉRIODE: {start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}
-
-    INSTRUCTIONS STRICTES:
-    - EXACTEMENT 400 mots minimum
-    - Inclus:
-    * Méditation ou affirmation spécifique
-    * Pratiques quotidiennes suggérées (méditation, balade dans la nature, parler avec des proches)
-    * Message d'encouragement
-    * Call-to-action chaine YouTube AstroGenAI (abonnement, commentaires, partage)
-    - FRANÇAIS UNIQUEMENT - noms de signes en français (Bélier, Lion, etc.)
-    - NE PAS METTRE D'EMOJI
-    - NE PAS SUGGERER DES PRATIQUES ESOTERIQUES
-    - N'utilise pas le mot Astrologue pour te définir mais "AstroGenAI"
-    - Parle directement aux spectateurs ("vous", "votre")
-    - Ton bienveillant et engageant
-
-    Écris cette conclusion substantielle maintenant:"""
-
+        template = self.weekly_prompts.get_conclusion_section_template()
+        prompt = template.format(
+            period=f"{start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}"
+        )
         return await self._call_ollama_for_long_content(prompt)
-
-    def _clean_script_text(self, text: str) -> str:
-        """Nettoie et améliore le script final"""
-        # Traduire les noms de signes anglais en français
-        translations = {
-            'Aries': 'Bélier', 'Taurus': 'Taureau', 'Gemini': 'Gémeaux',
-            'Leo': 'Lion', 'Virgo': 'Vierge', 'Libra': 'Balance',
-            'Scorpio': 'Scorpion', 'Sagittarius': 'Sagittaire', 
-            'Capricorn': 'Capricorne', 'Aquarius': 'Verseau', 'Pisces': 'Poissons',
-            'conjunction': 'conjonction'
-        }
-        
-        for en, fr in translations.items():
-            text = text.replace(en, fr)
-        
-        # Nettoyer les doublons d'espaces et caractères étranges
-        import re
-        text = re.sub(r'\n{3,}', '\n\n', text)  # Max 2 retours à la ligne
-        text = re.sub(r' {2,}', ' ', text)      # Max 1 espace
-        text = text.strip()
-        
-        return text
 
     # =============================================================================
     # SINGLE HOROSCOPE TITLE
     # =============================================================================
     async def _extract_title_theme(self, horoscope_text: str) -> str:
-        """Utilise Ollama pour extraire une phrase clé pour le titre."""
-        prompt = f"""
-        Voici un horoscope. Résume son idée principale en une phrase courte et percutante de 3 à 5 mots maximum, idéale pour un titre de vidéo YouTube.
-        Ne mentionne pas le signe astrologique.
-        
-        ### INSTRUCTIONS STRICTES ###
-        1. La phrase doit être en FRANÇAIS UNIQUEMENT.
-        2. La phrase doit contenir entre 3 et 5 mots.
-        3. N'ajoute PAS l'année, la date, ou le nom du signe.
-        4. Réponds UNIQUEMENT avec la phrase, sans guillemets ni préfixe.
-        5. Ne fournis AUCUNE traduction, explication ou commentaire.
-        
-        ### EXEMPLE ###
-        Horoscope: "Cher Lion, une opportunité financière inattendue se présente. Saisissez-la avec audace mais prudence."
-        Phrase pour le titre: Une opportunité financière à saisir
-
-        ### HOROSCOPE À RÉSUMER ###
-        Horoscope: "{horoscope_text}"
-        
-        ### PHRASE POUR LE TITRE ###
-
-        """
+        template = TitlePromptTemplates.get_indivual_title_template()
+        prompt = template.format(horoscope_text=horoscope_text)
         try:
-            theme = await self._call_ollama_with_retry(prompt)
-            return theme.strip().replace('"', '').replace("Phrase pour le titre:", "").strip()
+            clean_title = await self._call_ollama_with_retry(prompt)
+            return clean_title.strip().replace('"', '').replace("Phrase pour le titre:", "").strip()
         except Exception as e:
             logger.warning(f"Échec de l'extraction du thème, utilisation de fallback: {e}")
             # En cas d'échec, on retourne une chaîne vide ou un titre générique
