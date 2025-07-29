@@ -15,6 +15,7 @@ from dataclasses import dataclass, asdict
 import hashlib
 from pathlib import Path
 from config import settings
+import re
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -503,7 +504,6 @@ class AstroGenerator:
         pronunciation_fixes = {
             'AstroGenAI': 'Astro Gen A I',
             'AI': 'A I',
-            'TTS': 'T T S',
             'vs': 'versus',
             '&': 'et',
             '@': 'arobase',
@@ -606,7 +606,7 @@ class AstroGenerator:
                     options={
                         'temperature': 0.6,
                         'top_p': 0.9,
-                        'num_predict': 6000,      
+                        'num_predict': 3000,      
                         'repeat_penalty': 1.1,   
                         'top_k': 40,
                         'stop': ["=== Fin"]             
@@ -687,6 +687,7 @@ class AstroGenerator:
                     astrochart_data = None
             
             prompt = self._create_horoscope_prompt(validated_sign, astral_context, astrochart_data)
+            
             logger.info(f"--- Prompt {'enrichi' if astrochart_data else 'standard'} envoyé à Ollama ---")
             
             horoscope_text = await self._call_ollama_with_retry(prompt)
@@ -705,7 +706,7 @@ class AstroGenerator:
                 astrochart_data=astrochart_data,
                 title_theme=title_theme
             )
-            
+            print(result)
             # Génération audio optionnelle
             audio_path, audio_duration = None, 0.0
             if generate_audio and TTS_AVAILABLE:

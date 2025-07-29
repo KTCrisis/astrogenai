@@ -63,6 +63,7 @@ class HoroscopePromptTemplates:
             INSTRUCTIONS:
             - UTILISE les positions et aspects RÉELS ci-dessus (pas des généralités)
             - Fais une analyse pour le {{date}}
+            - Ne mentionne pas la semaine, mais utilise la date du jour
             - Mentionne 1 seul aspect le plus significatif s'ils concernent le signe
             - N'INDIQUE pas les orbes et degrés dans ta réponse
             - Adapte selon la phase lunaire actuelle
