@@ -237,8 +237,8 @@ class AstroGenerator:
         self.ollama_model = settings.OLLAMA_TEXT_MODEL
         self.audio_output_dir = settings.GENERATED_AUDIO_DIR
         self.max_retries = 3 
-        self.horoscope_min_words = 20
-        self.horoscope_max_words = 50
+        self.horoscope_min_words = 100
+        self.horoscope_max_words = 200
         self.signs_data = self._load_signs_data()
         self.planetary_influences = self._load_planetary_influences()
         self.audio_lang = "fr"
@@ -575,11 +575,13 @@ class AstroGenerator:
                 # Essayer avec la bibliothèque ollama
                 response = ollama.chat(
                     model=self.ollama_model,
+                    stream=False,
+                    think=False,
                     messages=[{'role': 'user', 'content': prompt}],
                     options={
                         'temperature': 0.7,
                         'top_p': 0.9,
-                        'num_predict': 2500, 
+                        'num_predict': 5000, 
                         'stop': None  
                     }
                 )
@@ -602,11 +604,13 @@ class AstroGenerator:
             try:
                 response = ollama.chat(
                     model=self.ollama_model,
+                    stream=False,
+                    think=False,
                     messages=[{'role': 'user', 'content': prompt}],
                     options={
                         'temperature': 0.6,
                         'top_p': 0.9,
-                        'num_predict': 3000,      
+                        'num_predict': 8000,      
                         'repeat_penalty': 1.1,   
                         'top_k': 40,
                         'stop': ["=== Fin"]             

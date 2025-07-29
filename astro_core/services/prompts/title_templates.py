@@ -13,13 +13,13 @@ class TitlePromptTemplates:
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
+            {base.get_qwen_rules()}
+            {base.get_french_language_rules()}
 
             MISSION: Extrais l'idée principale d'un horoscope en un titre YouTube percutant.
 
             HOROSCOPE À ANALYSER:
             {{horoscope_text}}
-
-            {base.get_french_language_rules()}
 
             RÈGLES STRICTES POUR LE TITRE:
             - EXACTEMENT 3 à 5 mots maximum
@@ -62,7 +62,7 @@ class TitlePromptTemplates:
 
             HOROSCOPE À ANALYSER:
             {{horoscope_text}}
-
+            {base.get_qwen_rules()}
             {base.get_french_language_rules()}
 
             RÈGLES STRICTES POUR LE TITRE:

@@ -9,28 +9,35 @@ class WeeklyPromptTemplates:
     
     @staticmethod
     def get_intro_section_template():
-        """Template pour section introduction (800 mots)"""
+        """Template pour section introduction avec continuité"""
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
-
- MISSION: Écris UNIQUEMENT une introduction captivante de 800 mots minimum pour une vidéo astrologique hebdomadaire.
+        {base.get_qwen_rules()}
+        MISSION: Écris UNIQUEMENT une introduction captivante de 800 mots minimum pour une vidéo astrologique hebdomadaire.
 
         PÉRIODE: {{period}}
         ÉVÉNEMENTS MAJEURS: {{events}}
-
+        CONTEXTE ASTRAL DÉTAILLÉ: {{astral_context}}
+        
         {base.get_length_requirements(800)}
         {base.get_french_language_rules()}
         {base.get_astrological_language_rules()}
         {base.get_youtube_tone()}
 
-        STRUCTURE OBLIGATOIRE DE L'INTRODUCTION:
+        ⚠️ CONTRAINTES DE FLUX CRITIQUES:
+        - Cette introduction fait partie d'une vidéo CONTINUE
+        - Ne termine PAS par "bonne semaine", "à bientôt", ou autre formule de clôture
+        - Termine par une TRANSITION vers l'analyse des événements cosmiques
+        - Maintiens l'engagement pour la suite immédiate
+
+        STRUCTURE OBLIGATOIRE:
         
-        ACCUEIL CHALEUREUX :
-        -"Bienvenue dans votre Guide AstroGenAI hebdomadaire !"
+        ACCUEIL CHALEUREUX:
+        - "Bienvenue dans votre Guide AstroGenAI hebdomadaire !"
         - Salutation personnalisée selon la saison
 
-        ACCROCHE COSMIQUE :
+        ACCROCHE COSMIQUE:
         - Métaphore poétique sur l'énergie de la semaine
         - Image évocatrice du ciel étoilé actuel
         - Teasing de l'événement le plus spectaculaire
@@ -38,59 +45,59 @@ class WeeklyPromptTemplates:
         ÉVÉNEMENT PHARE:
         - Description détaillée de l'événement cosmique majeur
         - Contexte historique ou symbolique
-        - Pourquoi c'est exceptionnel cette semaine
         - Impact émotionnel et spirituel attendu
 
-        PREVIEW DE LA VIDÉO :
-        - Annonce des sections à venir avec enthousiasme
-        - Promesse de révélations personnalisées par signe
-        - Mention des rituels/pratiques qui seront partagés
-        - Invitation à rester jusqu'à la fin
+        TRANSITION OBLIGATOIRE (dernière phrase):
+        - "Plongeons maintenant dans le détail de ces énergies cosmiques..."
+        - OU "Explorons ensemble comment ces forces célestes se déploient..."
+        - OU "Découvrons précisément comment ces influences vont façonner notre semaine..."
 
-        TRANSITION VERS LE CONTENU :
-        - Phrase de transition élégante vers la suite
-        - Maintien de l'engagement
+        ❌ INTERDICTIONS ABSOLUES:
+        - "Bonne semaine", "excellente semaine", "belle semaine"
+        - "À bientôt", "à très vite", "au revoir"
+        - "Prenez soin de vous", "portez-vous bien"
+        - Toute formule de conclusion définitive
 
-        TONS SPÉCIFIQUES À UTILISER:
-        - Mystérieux mais accessible
-        - Chaleureux et bienveillant
-        - Enthousiaste sans être excessif
-        - Poétique mais informatif
-
-        MOTS-CLÉS À INTÉGRER NATURELLEMENT:
-        - "énergie cosmique", "vibrations célestes"
-        - "voyage astral", "guidance des étoiles"
-        - "transformation", "révélation", "illumination"
-
-        Écris maintenant cette introduction substantielle et captivante:"""
+        Écris maintenant cette introduction avec transition fluide:"""
 
     def get_events_analysis_template():
-        """Template pour analyse des événements (1200 mots)"""
+        """Template pour analyse des événements avec continuité"""
         base = BasePromptTemplates()
-        
+        {base.get_qwen_rules()}
         return f"""{base.get_astrologer_persona()}
 
-            MISSION: Raconte l'histoire astrologique de la semaine en 1200 mots minimum, comme un conteur passionné.
+        MISSION: Raconte l'histoire astrologique de la semaine en 1200 mots minimum.
 
-            ÉVÉNEMENTS À NARRER: {{events}}
+        ÉVÉNEMENTS À NARRER: {{events}}
 
-            {base.get_length_requirements(1200)}
-            {base.get_french_language_rules()}
-            {base.get_astrological_language_rules()}
-            {base.get_youtube_tone()}
+        {base.get_length_requirements(1200)}
+        {base.get_french_language_rules()}
+        {base.get_astrological_language_rules()}
+        {base.get_youtube_tone()}
 
-            STYLE NARRATIF OBLIGATOIRE:
-            - Raconte chaque événement comme une "scène cosmique"
-            - Utilise des métaphores vivantes (danse, rencontre, dialogue entre planètes)
-            - Varie tes formulations - ne répète jamais la même structure
-            - Intègre naturellement les aspects astrologiques dans le récit
-            - Évite le jargon technique - explique avec des images poétiques
+        ⚠️ CONTRAINTES DE FLUX CRITIQUES:
+        - Cette section fait partie d'une vidéo CONTINUE
+        - Ne termine PAS par des formules de clôture ou de vœux
+        - Termine par une TRANSITION vers les conseils par signe
+        - L'audience continue à regarder immédiatement après
 
-            EXEMPLE DE STYLE ATTENDU:
-            ❌ "Le 3 août, Saturne sextile Uranus indique..."
-            ✅ "Le 3 août, le sage Saturne tend la main vers l'innovateur Uranus, créant une alliance magique entre tradition et révolution..."
+        STYLE NARRATIF OBLIGATOIRE:
+        - Raconte chaque événement comme une "scène cosmique"
+        - Utilise des métaphores vivantes
+        - Varie tes formulations - évite les répétitions
+        - Évite le jargon technique - privilégie les images poétiques
 
-            Raconte maintenant cette épopée cosmique:"""
+        TRANSITION OBLIGATOIRE (dernières phrases):
+        - "Maintenant que nous avons exploré ces énergies globales, voyons comment elles résonnent spécifiquement pour chaque signe..."
+        - OU "Ces influences cosmiques touchent chacun différemment selon son signe. Découvrons ensemble vos guidance personnalisées..."
+
+        ❌ INTERDICTIONS ABSOLUES:
+        - "Excellente semaine cosmique", "merveilleuse semaine"
+        - "Que les étoiles vous accompagnent", "belle semaine à tous"
+        - Toute formule de conclusion ou de vœux
+        - "À bientôt", "prenez soin de vous"
+
+        Raconte maintenant cette épopée cosmique avec transition fluide:"""
 
     @staticmethod
     def get_signs_section_template():
@@ -98,7 +105,7 @@ class WeeklyPromptTemplates:
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
-
+        {base.get_qwen_rules()}
         MISSION: Écris le conseil hebdomadaire détaillé pour le signe {{sign_name}} uniquement environ 200 à 300 mots.
 
         CONTEXTE ÉNERGÉTIQUE: {{events}}
@@ -141,19 +148,24 @@ class WeeklyPromptTemplates:
 
     @staticmethod
     def get_conclusion_section_template():
-        """Template pour conclusion et rituels"""
+        """Template pour conclusion finale uniquement"""
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
+        {base.get_qwen_rules()}
+        MISSION: Écris UNIQUEMENT une conclusion finale avec rituels de 500 mots minimum.
 
-            MISSION: Écris UNIQUEMENT une conclusion avec rituels de 500 mots minimum.
+        PÉRIODE: {{period}}
 
-            PÉRIODE: {{period}}
+        {base.get_length_requirements(500)}
+        {base.get_french_language_rules()}
+        {base.get_astrological_language_rules()}
+        {base.get_youtube_tone()}
 
-            {base.get_length_requirements(500)}
-            {base.get_french_language_rules()}
-            {base.get_astrological_language_rules()}
-            {base.get_youtube_tone()}
+        ⚠️ RÔLE SPÉCIFIQUE:
+        - Cette section CLÔTURE définitivement la vidéo
+        - C'est ICI et SEULEMENT ICI que tu peux dire "bonne semaine"
+        - Seule section autorisée à avoir des formules de fin
 
         STRUCTURE OBLIGATOIRE:
 
@@ -162,26 +174,26 @@ class WeeklyPromptTemplates:
         - Message d'espoir et d'encouragement
         - Lien entre tous les signes dans cette énergie commune
 
-        RITUEL HEBDOMADAIRE GUIDÉ :
+        RITUEL HEBDOMADAIRE GUIDÉ:
         - Méditation spécifique à la semaine (étapes détaillées)
         - Affirmations à répéter quotidiennement
-        - Pratique énergétique simple (respiration, visualisation)
+        - Pratique énergétique simple
         - Meilleur moment pour pratiquer
 
         CONSEILS PRATIQUES UNIVERSELS:
         - 3 actions concrètes valables pour tous les signes
-        - Element à privilégier (eau, feu, terre, air)
-        - Couleurs ou objets porte-bonheur de la semaine
+        - Élément à privilégier cette semaine
+        - Couleurs ou objets porte-bonheur
 
-        CALL-TO-ACTION ENGAGEANT :
+        CLÔTURE FINALE AUTORISÉE:
+        - "Excellente semaine cosmique à tous !"
+        - "Que les étoiles illuminent votre chemin cette semaine !"
+        - "Belle semaine sous ces influences bienveillantes !"
+
+        CALL-TO-ACTION ENGAGEANT:
         - Invitation chaleureuse à s'abonner
-        - Demande de commentaires spécifique ("Quel signe vous a le plus parlé ?")
-        - Encouragement au partage avec une raison émotionnelle
+        - Demande de commentaires spécifique
+        - Encouragement au partage
         - Teasing de la semaine prochaine
-        - Rappel des autres contenus (horoscopes quotidiens, etc.)
 
-        EXEMPLES DE FORMULATIONS ENGAGEANTES:
-        ✅ "Si cette guidance cosmique a éclairé votre chemin..."
-        ✅ "Partagez dans les commentaires quel conseil vous a fait vibrer..."
-        ✅ "Abonnez-vous pour ne jamais manquer nos rendez-vous stellaires..."
-        """
+        Écris maintenant cette conclusion finale:"""

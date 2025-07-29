@@ -1081,10 +1081,11 @@ Réponse:"""
         'model': model,
         'prompt': astro_prompt,
         'stream': False,
+        'think': False,
         'options': {
             'temperature': 0.7,
             'top_p': 0.9,
-            'num_predict': 500
+            'num_predict': 2000
         }
     }
     

@@ -13,7 +13,9 @@ class HoroscopePromptTemplates:
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
-
+            {base.get_length_requirements(50)}
+            {base.get_french_language_rules()}
+            {base.get_qwen_rules()}
             MISSION: Écris un horoscope court et engageant pour le signe {{sign_name}} ({{sign_dates}}).
 
             CONTEXTE ASTROLOGIQUE:
@@ -26,9 +28,6 @@ class HoroscopePromptTemplates:
             - Élément: {{element}}
             - Planète maîtresse: {{ruling_planet}}
             - Traits principaux: {{traits}}
-
-            {base.get_length_requirements(50)}
-            {base.get_french_language_rules()}
 
             INSTRUCTIONS SPÉCIFIQUES:
             - Horoscope de {{min_words}}-{{max_words}} mots maximum
@@ -45,7 +44,8 @@ class HoroscopePromptTemplates:
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
-
+            {base.get_qwen_rules()}
+            {base.get_french_language_rules()}
             MISSION: Crée un horoscope de {{min_words}}-{{max_words}} mots en utilisant les données astronomiques RÉELLES.
 
             DONNÉES ASTRONOMIQUES RÉELLES pour le {{date}}:
@@ -57,8 +57,6 @@ class HoroscopePromptTemplates:
             SIGNE À ANALYSER: {{sign_name}} ({{sign_dates}})
             Élément: {{element}} | Planète maîtresse: {{ruling_planet}}
             Traits: {{traits}}
-
-            {base.get_french_language_rules()}
 
             INSTRUCTIONS:
             - UTILISE les positions et aspects RÉELS ci-dessus (pas des généralités)
@@ -79,14 +77,12 @@ class HoroscopePromptTemplates:
         base = BasePromptTemplates()
         
         return f"""{base.get_astrologer_persona()}
-
+            {base.get_qwen_rules()}
+            {base.get_french_language_rules()}
             MISSION: Génère les horoscopes pour TOUS les 12 signes pour la date {{date}}.
 
             CONTEXTE ASTRAL GLOBAL:
             {{astral_context}}
-
-            {base.get_french_language_rules()}
-
             INSTRUCTIONS:
             - Horoscope de 30-50 mots par signe
             - Adapte chaque horoscope aux traits spécifiques du signe
