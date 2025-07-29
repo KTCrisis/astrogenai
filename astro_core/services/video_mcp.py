@@ -933,7 +933,7 @@ if __name__ == "__main__":
     print(f"   • Dossier sortie: {status['directories']['output']}")
     print(f"   • Dossier vidéos: {status['directories']['video_input']}")
     print(f"   • Dossier audios: {status['directories']['audio_input']}")
-    print(f"   • Modèle Whisper: {"base"}")
+    print(f"   • Modèle Whisper: {"medium"}")
     
     print(f"📦 Dépendances:")
     print(f"   • Whisper: {'✅' if status['whisper_available'] else '❌'}")

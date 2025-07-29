@@ -859,12 +859,21 @@ class AstroGenerator:
         template = TitlePromptTemplates.get_indivual_title_template()
         prompt = template.format(horoscope_text=horoscope_text)
         try:
-            clean_title = await self._call_ollama_with_retry(prompt)
-            return clean_title.strip().replace('"', '').replace("Phrase pour le titre:", "").strip()
+            response = ollama.chat(
+                model=self.ollama_model,
+                stream=False,
+                think=False,
+                messages=[{'role': 'user', 'content': prompt}],
+                options={
+                    'temperature': 0.9,      # Plus créatif
+                    'top_p': 0.8,           # Moins prévisible
+                    'num_predict': 50,      # Titre court
+                    'repeat_penalty': 1.3   # Évite répétitions
+                }
+            )
+            return response['message']['content'].strip().replace('"', '').strip()
         except Exception as e:
-            logger.warning(f"Échec de l'extraction du thème, utilisation de fallback: {e}")
-            # En cas d'échec, on retourne une chaîne vide ou un titre générique
-            return "Votre Horoscope par AI"
+            return "Découverte astrologique unique"
 
     # =============================================================================
     # TTS
