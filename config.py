@@ -31,7 +31,7 @@ class Settings:
 
     # --- Configuration des Modèles IA ---
     # Modèle pour la génération de texte (horoscopes)
-    OLLAMA_TEXT_MODEL = os.getenv("OLLAMA_MODEL", "mistral:7b-instruct")
+    OLLAMA_TEXT_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b-instruct-q8_0")
     # Modèle pour l'orchestration (plus puissant si possible)
     OLLAMA_ORCHESTRATOR_MODEL = os.getenv("OLLAMA_ORCHESTRATOR_MODEL", "llama3.1:8b-instruct-q8_0")
     # Modèle pour le chat (conversationnel)
