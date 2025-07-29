@@ -16,6 +16,7 @@ import hashlib
 from pathlib import Path
 from config import settings
 import re
+from datetime import date
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -40,6 +41,14 @@ try:
 except ImportError as e:
     PROMPTS_AVAILABLE = False
     print(f"⚠️ Prompts modulaires non disponibles: {e}")
+
+try:
+    from .weekly import WeeklyGenerator
+    WEEKLY_MODULE_AVAILABLE = True
+    print("✅ WeeklyGenerator importé")
+except ImportError as e:
+    WEEKLY_MODULE_AVAILABLE = False
+    print(f"⚠️ WeeklyGenerator non disponible: {e}")
 
 try:
     astrochart_path = os.path.join(os.path.dirname(__file__), 'astrochart')
@@ -248,20 +257,27 @@ class AstroGenerator:
             self.chart_generator = AstroChartImageGenerator(astro_calculator)
         else:
             self.chart_generator = None
+
         if ASTROCHART_AVAILABLE:
             self.astro_calculator = astro_calculator
+        else:
+            self.astro_calculator= None
+        if WEEKLY_MODULE_AVAILABLE:  # ← Le problème est probablement ici
+            self.weekly_generator = WeeklyGenerator(self)
+        else:
+            self.weekly_generator= None
+
         if PROMPTS_AVAILABLE:
             self.prompt_manager = PromptManager()
             self.horoscope_prompts = HoroscopePromptTemplates()
             self.weekly_prompts = WeeklyPromptTemplates()
             self.title_prompts = TitlePromptTemplates()
-            logger.info("✅ Prompts modulaires initialisés")
         else:
             self.prompt_manager = None
             self.horoscope_prompts = None
             self.weekly_prompts = None
             self.title_prompts = None
-            logger.warning("⚠️ Utilisation des prompts legacy")
+
 
     # =============================================================================
     # MÉTHODES UTILITAIRES 
@@ -396,7 +412,7 @@ class AstroGenerator:
             'Capricornes': 'Capricorne',
             'Verseaux': 'Verseau',
             'Versaus': 'Verseau',
-            'Poisson': 'Poissons',  # Au singulier par erreur
+            'Poissonsss': 'Poissons',  # Au singulier par erreur
             
             # Erreurs de genre/accord
             'le Bélier': 'Bélier',
@@ -522,6 +538,7 @@ class AstroGenerator:
         
         return text.strip()
 
+    
     def calculate_lunar_influence(self, sign: str, date: datetime.date) -> float:
         """Calcule l'influence lunaire sur un signe pour une date donnée."""
         try:
@@ -758,53 +775,35 @@ class AstroGenerator:
         logger.info(f"Génération terminée: {success_count}/{len(self.signs_data)} horoscopes créés")
 
         return horoscopes
-    
+                
     async def generate_single_weekly_sign(self, sign_key: str, events_str: str, period: str):
         """Génère le conseil hebdomadaire pour un seul signe"""
-        try:
-            # Validation et métadonnées (comme dans votre méthode existante)
-            validated_sign = self._validate_sign(sign_key)
-            sign_data = self.get_sign_metadata(validated_sign)
-            
-            # Template personnalisé pour ce signe
-            template = WeeklyPromptTemplates.get_signs_section_template()
-            prompt = template.format(
-                sign_name=sign_data.name,
-                sign_dates=sign_data.dates,
-                period=period,
-                events=events_str,
-                element=sign_data.element,
-                ruling_planet=sign_data.ruling_planet,
-                traits=', '.join(sign_data.traits)
-            )
-            
-            # Génération optimisée pour contenu court
-            content = await self._call_ollama_with_retry(prompt)
-            
-            # Validation basique
-            if f"{sign_data.name} :" not in content:
-                logger.warning(f"⚠️ Format incorrect pour {sign_data.name}, correction...")
-                content = f"{sign_data.name} : {content}"
-            
-            logger.info(f"✅ {sign_data.name} généré ({len(content.split())} mots)")
-            return content
-            
-        except Exception as e:
-            logger.error(f"❌ Erreur génération {sign_key}: {e}")
-            # Fallback comme dans votre méthode daily
-            return self._generate_weekly_fallback(sign_key, events_str)
-
-    def _generate_weekly_fallback(self, sign_key: str, events_str: str) -> str:
-        """Fallback pour un signe en cas d'échec (similaire à votre logique)"""
-        sign_data = self.get_sign_metadata(sign_key)
+        # Validation et métadonnées (comme dans votre méthode existante)
+        validated_sign = self._validate_sign(sign_key)
+        sign_data = self.get_sign_metadata(validated_sign)
         
-        fallback = f"""{sign_data.name} : Cette semaine apporte des énergies cosmiques particulières pour votre signe {sign_data.element.lower()}. 
-        Les influences planétaires actuelles résonnent avec votre nature {', '.join(sign_data.traits[:2])}, 
-        vous invitant à rester attentif aux opportunités qui se présentent. 
-        Conseil pratique : privilégiez {sign_data.keywords[0]} cette semaine tout en évitant les décisions impulsives. 
-        Votre planète maîtresse {sign_data.ruling_planet} vous guide vers de nouveaux horizons."""
+        # Template personnalisé pour ce signe
+        template = WeeklyPromptTemplates.get_signs_section_template()
+        prompt = template.format(
+            sign_name=sign_data.name,
+            sign_dates=sign_data.dates,
+            period=period,
+            events=events_str,
+            element=sign_data.element,
+            ruling_planet=sign_data.ruling_planet,
+            traits=', '.join(sign_data.traits)
+        )
         
-        return fallback
+        # Génération optimisée pour contenu court
+        content = await self._call_ollama_with_retry(prompt)
+        
+        # Validation basique
+        if f"{sign_data.name} :" not in content:
+            logger.warning(f"⚠️ Format incorrect pour {sign_data.name}, correction...")
+            content = f"{sign_data.name} : {content}"
+        
+        logger.info(f"✅ {sign_data.name} généré ({len(content.split())} mots)")
+        return content
 
     async def generate_all_weekly_signs(self, events_str: str, period: str) -> str:
         """Génère tous les conseils hebdomadaires en parallèle (comme daily_horoscopes)"""
@@ -842,95 +841,16 @@ class AstroGenerator:
         # Assembler tous les signes
         final_content = "\n\n".join(weekly_signs_content)
         
-        return final_content     
-
-    async def _generate_signs_section_parallel(self, events_str: str, start_date, end_date) -> str:
-        """Version parallèle de votre méthode (comme generate_daily_horoscopes)"""
-        
-        period = f"{start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}"
-        
-        # Utiliser la génération parallèle
-        signs_content = await self.generate_all_weekly_signs(
-            events_str, period
-        )
-        
-        # Nettoyage final (votre méthode existante)
-        signs_content = self._clean_script_text(signs_content)
-        
-        return signs_content
-    
-    async def generate_weekly_summary_by_sections_parallel(self, start_date: datetime.date, end_date: datetime.date):
-        """Version optimisée avec génération parallèle des signes"""
-        logger.info(f"🚀 Génération hebdomadaire PARALLÈLE du {start_date} au {end_date}")
-
-        # 1. Vos calculs d'événements existants
-        weekly_events = self.astro_calculator.get_major_events_for_week(start_date, end_date)
-        events_str = "\n".join([f"- Le {e['date']}: {e['description']} ({e['type']})" for e in weekly_events])
-        
-        sections = []
-        
-        # 2. Introduction (méthode existante)
-        intro_section = await self._generate_intro_section(start_date, end_date, events_str)
-        sections.append(intro_section)
-        
-        # 3. Événements (méthode existante)
-        events_section = await self._generate_events_analysis_section(events_str, weekly_events)
-        sections.append(events_section)
-        
-        # 4. SIGNES EN PARALLÈLE - NOUVELLE MÉTHODE
-        signs_section = await self._generate_signs_section_parallel(events_str, start_date, end_date)
-        sections.append(signs_section)
-        
-        # 5. Conclusion (méthode existante)
-        conclusion_section = await self._generate_conclusion_section(start_date, end_date)
-        sections.append(conclusion_section)
-        
-        # 6. Assemblage final
-        script_text = "\n\n".join(sections)
-        script_text = self._clean_script_text(script_text)
-        
-        # 7. Audio
-        filename = f"hub_weekly_parallel_{start_date.strftime('%Y%m%d')}"
-        audio_path, audio_duration = self.generate_tts_audio(script_text, filename)
-
-        logger.info(f"✅ Résumé hebdomadaire PARALLÈLE généré. Durée: {audio_duration:.2f}s")
-        return script_text, audio_path, audio_duration
+        return final_content  
 
     async def generate_weekly_summary(self, start_date: datetime.date, end_date: datetime.date) -> Tuple[str, str, float]:
         """
-        Génère le script et l'audio pour la vidéo "Hub" hebdomadaire.
-        Version par sections pour garantir la longueur.
+        Point d'entrée principal pour génération hebdomadaire
+        Utilise WeeklyGenerator 
         """
-        return await self.generate_weekly_summary_by_sections_parallel(start_date, end_date)
+        logger.info("🚀 Utilisation du WeeklyGenerator contextuel")
+        return await self.weekly_generator.generate_weekly_summary_with_context(start_date, end_date)
 
-    async def _generate_intro_section(self, start_date, end_date, events_str) -> str:
-        """Génère la section introduction (800 mots)"""
-        astral_context_formatted = self._format_astral_context_for_weekly(start_date, end_date)
-        template = WeeklyPromptTemplates.get_intro_section_template()
-        enhanced_template = template.replace(
-        "ÉVÉNEMENTS MAJEURS: {events}",
-        "ÉVÉNEMENTS MAJEURS: {events}\n\nCONTEXTE ASTRAL DÉTAILLÉ:\n{astral_context}"
-        )
-        prompt = enhanced_template.format(
-            period=f"{start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}",
-            events=events_str,
-            astral_context=astral_context_formatted
-        )
-        return await self._call_ollama_for_long_content(prompt)
-
-    async def _generate_events_analysis_section(self, events_str, weekly_events) -> str:
-        """Génère l'analyse détaillée des événements (1200 mots)"""
-        template = WeeklyPromptTemplates.get_events_analysis_template()
-        prompt = template.format(events=events_str)
-        return await self._call_ollama_for_long_content(prompt)
-
-    async def _generate_conclusion_section(self, start_date, end_date) -> str:
-        """Génère la section rituels et conclusion (400 mots)"""
-        template = self.weekly_prompts.get_conclusion_section_template()
-        prompt = template.format(
-            period=f"{start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}"
-        )
-        return await self._call_ollama_for_long_content(prompt)
 
     # =============================================================================
     # SINGLE HOROSCOPE TITLE
@@ -1006,8 +926,11 @@ class AstroGenerator:
             "ollama_available": OLLAMA_AVAILABLE,
             "fastmcp_available": FASTMCP_AVAILABLE,
             "tts_available": TTS_AVAILABLE,
+            "weekly_generator_available": self.weekly_generator is not None,
+            "weekly_module_available": WEEKLY_MODULE_AVAILABLE,
             "signs_count": len(self.signs_data),
             "audio_files_count": 0
+
         }
         
         # Compter les fichiers audio

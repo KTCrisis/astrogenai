@@ -25,6 +25,11 @@ class WeeklyPromptTemplates:
         {base.get_astrological_language_rules()}
         {base.get_youtube_tone()}
 
+        CONTEXTE PRÉCÉDENT: {{context_summary}}
+        ÉVITER DE RÉPÉTER: {{avoid_repetition}} 
+        TONALITÉ ÉTABLIE: {{previous_tone}}
+        OBJECTIF MOTS: {{word_target}}
+
         ⚠️ CONTRAINTES DE FLUX CRITIQUES:
         - Cette introduction fait partie d'une vidéo CONTINUE
         - Ne termine PAS par "bonne semaine", "à bientôt", ou autre formule de clôture
@@ -75,6 +80,12 @@ class WeeklyPromptTemplates:
         {base.get_astrological_language_rules()}
         {base.get_youtube_tone()}
 
+
+        CONTEXTE PRÉCÉDENT: {{context_summary}}
+        ÉVITER DE RÉPÉTER: {{avoid_repetition}} 
+        TONALITÉ ÉTABLIE: {{previous_tone}}
+        OBJECTIF MOTS: {{word_target}}
+
         ⚠️ CONTRAINTES DE FLUX CRITIQUES:
         - Cette section fait partie d'une vidéo CONTINUE
         - Ne termine PAS par des formules de clôture ou de vœux
@@ -115,6 +126,11 @@ class WeeklyPromptTemplates:
         {base.get_astrological_language_rules()}
         {base.get_youtube_tone()}
   
+        CONTEXTE PRÉCÉDENT: {{context_summary}}
+        ÉVITER DE RÉPÉTER: {{avoid_repetition}} 
+        TONALITÉ ÉTABLIE: {{previous_tone}}
+        OBJECTIF MOTS: {{word_target}}
+
         SIGNE À TRAITER: {{sign_name}} ({{sign_dates}})
         PÉRIODE: {{period}}
         CONTEXTE ÉNERGÉTIQUE: {{events}}
@@ -157,6 +173,12 @@ class WeeklyPromptTemplates:
 
         PÉRIODE: {{period}}
 
+
+        CONTEXTE PRÉCÉDENT: {{context_summary}}
+        ÉVITER DE RÉPÉTER: {{avoid_repetition}} 
+        TONALITÉ ÉTABLIE: {{previous_tone}}
+        OBJECTIF MOTS: {{word_target}}
+        
         {base.get_length_requirements(500)}
         {base.get_french_language_rules()}
         {base.get_astrological_language_rules()}

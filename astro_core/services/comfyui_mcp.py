@@ -428,7 +428,6 @@ class ComfyUIVideoGenerator:
 # \"12\": \"cosmic starry sky, **{color_secondary} nebula partially revealing constellation**, **stellar points pulsating**, delicate {frame_color} decorative elements beginning at corners, smooth morphing, masterpiece, high quality\",
 # \"16\": \"cosmic starry sky with swirling {color_secondary} nebula background, **{animal} in greek mythology style with {anatomic_details}**, **intense glowing {color_primary} {energy}**, ornate {frame_color} tarot card frame with intricate {symbols}, astrological decorations borders completely surrounding the scene, fortune telling card aesthetic, masterpiece, high quality\"''']
 
-
         return f'''\"0\": \"cosmic {color_primary} starry sky with swirling {color_secondary} nebula background, scattered stellar points, celestial atmosphere, mystical {sign_data["element"].lower()} space, masterpiece, high quality\",
 \"4\": \"cosmic {color_primary} starry sky, {color_secondary} nebula background, constellation pattern forming, scattered stellar points, cosmic masterpiece, high quality\",
 \"8\": \"**moving cosmic {color_primary} starry sky**, {color_secondary} nebula background moving, stars connecting with cosmic {energy}, {sign} constellation pattern forming, delicate {frame_color} filigree borders beginning to manifest at image corners, masterpiece, high quality\",
@@ -495,11 +494,11 @@ class ComfyUIVideoGenerator:
         if sign in complex_signs:
             workflow["26"]["inputs"]["strength"] = 0.2
             workflow["26"]["inputs"]["start_percent"] = 0.0
-            workflow["26"]["inputs"]["end_percent"] = 0.6
+            workflow["26"]["inputs"]["end_percent"] = 0.5
         else:
             workflow["26"]["inputs"]["strength"] = 0.2
             workflow["26"]["inputs"]["start_percent"] = 0.0
-            workflow["26"]["inputs"]["end_percent"] = 0.4
+            workflow["26"]["inputs"]["end_percent"] = 0.43
 
         # Negative Prompt
         workflow["16"]["inputs"]["text"] = """blurry, low quality, human, duplicate, abrupt transition, sudden change, 
